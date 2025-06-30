@@ -37,6 +37,9 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             border: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .print-btn {
@@ -60,12 +63,24 @@
             cursor: not-allowed;
         }
 
+        .print-btn-no-header {
+            background: #3498db;
+        }
+
+        .print-btn-no-header:hover {
+            background: #2980b9;
+        }
+
         /* Header */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 20px;
+        }
+
+        .header.hidden-content {
+            visibility: hidden;
         }
 
         .logo {
@@ -363,6 +378,9 @@
         <button class="print-btn" onclick="printDocument()" id="printBtn">
             🖨️ In phiếu giao hàng
         </button>
+        <button class="print-btn print-btn-no-header" onclick="printDocumentNoHeader()" id="printBtnNoHeader">
+            📄 In không tiêu đề
+        </button>
     </div>
 
     <!-- Print Status -->
@@ -379,7 +397,7 @@
 
     <div class="container">
         <!-- Header -->
-        <div class="header">
+        <div class="header" id="headerSection">
             <div class="logo">
                 <img src="https://poalninh.github.io/PostPrint/logo moc an-01.png" alt="Logo Mộc Ấn">
             </div>
@@ -455,7 +473,7 @@
             </div>
             <div class="signature-box">
                 <div class="signature-title">Người lập</div>
-                <div class="signature-name" id="nguoiTao"></div>
+                <div class="signature-name" id="nguoiLap"></div>
             </div>
         </div>
     </div>

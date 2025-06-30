@@ -39,17 +39,18 @@
             border: 1px solid #ddd;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
+            min-width: 180px;
         }
 
         .print-btn {
             background: #e74c3c;
             color: white;
             border: none;
-            padding: 12px 25px;
+            padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             transition: background 0.3s;
         }
@@ -69,6 +70,22 @@
 
         .print-btn-no-header:hover {
             background: #2980b9;
+        }
+
+        .print-btn-a5 {
+            background: #27ae60;
+        }
+
+        .print-btn-a5:hover {
+            background: #229954;
+        }
+
+        .print-btn-a5-no-header {
+            background: #f39c12;
+        }
+
+        .print-btn-a5-no-header:hover {
+            background: #e67e22;
         }
 
         /* Header */
@@ -144,7 +161,7 @@
         }
 
         .product-table th {
-             background-color: #8bc53f;
+            background-color: #8bc53f;
             font-weight: bold;
             border: 1px solid #000;
             padding: 6px 4px;
@@ -295,13 +312,11 @@
             padding: 4px 6px;
         }
 
-        /* Print Styles */
+        /* Print A4 Styles */
         @media print {
-
             @page {
                 size: A4;
                 margin: 8mm !important;
-                /* giảm margin */
             }
 
             html {
@@ -376,10 +391,16 @@
     <!-- Print Controls -->
     <div class="print-controls">
         <button class="print-btn" onclick="printDocument()" id="printBtn">
-            🖨️ In phiếu giao hàng
+            🖨️ In A4 có tiêu đề
         </button>
         <button class="print-btn print-btn-no-header" onclick="printDocumentNoHeader()" id="printBtnNoHeader">
-            📄 In không tiêu đề
+            📄 In A4 không tiêu đề
+        </button>
+        <button class="print-btn print-btn-a5" onclick="printDocumentA5()" id="printBtnA5">
+            📋 In A5 có tiêu đề
+        </button>
+        <button class="print-btn print-btn-a5-no-header" onclick="printDocumentA5NoHeader()" id="printBtnA5NoHeader">
+            📃 In A5 không tiêu đề
         </button>
     </div>
 
@@ -477,7 +498,7 @@
             </div>
         </div>
     </div>
-    
+
     <script src="https://mocan.gpems.net/giaohang.js"></script>
 </body>
 

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đơn Đặt Hàng</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Times New Roman', Times, serif; background-color: #f0f2f5; padding: 15px; font-size: 13px; }
+        
+        /* CẬP NHẬT: Màu xanh đậm hơn và áp dụng cho các thành phần số */
+        .dynamic-data {
+            color: #004080; /* Xanh đậm chuyên nghiệp */
+            font-weight: 600;
+        }
+        .number.dynamic-data {
+            color: #004080;
+        }
+        
+        .container { 
+            max-width: 210mm; margin: 0 auto; margin-top: 60px; background: white; 
+            position: relative; z-index: 1; padding: 15mm; box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #demoWatermark {
+            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 120px; color: rgba(255, 0, 0, 0.08); font-weight: bold; z-index: 0; pointer-events: none;
+            text-align: center; white-space: nowrap;
+        }
+        .print-controls {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px); padding: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex; gap: 8px; justify-content: center;
+        }
+        .print-btn, .download-btn {
+            border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;
+            font-size: 14px; font-weight: bold; flex-grow: 1; max-width: 200px;
+        }
+        @media (min-width: 768px) {
+            .container { margin-top: 0; }
+            .print-controls { top: 20px; right: 20px; left: auto; width: auto; flex-direction: column; gap: 10px; }
+            .print-btn, .download-btn { padding: 12px 25px; flex-grow: 0; }
+        }
+        .print-btn { background: #e74c3c; color: white; }
+        .download-btn { background: #3498db; color: white; }
+        .print-btn:disabled, .download-btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+        .header .logo img { max-width: 100%; }
+        .title { text-align: center; font-size: 23px; font-weight: bold; margin: 20px 0 5px 0; letter-spacing: 2px; }
+        .order-number { text-align: center; font-size: 13px; margin-bottom: 20px; font-weight: bold; }
+        .customer-info, .product-table, .signature-table { width: 100%; border-collapse: collapse; border: 1px solid #000; margin-bottom: 15px; }
+        .customer-info td, .product-table th, .product-table td, .signature-table td { border: 1px solid #000; padding: 6px 8px; vertical-align: middle; }
+        .product-table th { background-color: #f2f2f2; font-weight: bold; }
+        .product-name { text-align: left !important; width: 35%; }
+        .product-image { width: 70px; height: 70px; margin: auto; display: flex; align-items: center; justify-content: center; background-color: #f0f0f0; }
+        .product-image img { max-width: 100%; max-height: 100%; object-fit: contain; cursor: pointer; }
+        .total-row { font-weight: bold; }
+        .number { text-align: right; }
+        .bottom-section { display: flex; margin-bottom: 20px; page-break-inside: avoid; }
+        .left-info, .right-info { border: 1px solid #000; padding: 10px; line-height: 1.4; }
+        .left-info { width: 60%; border-right: none; }
+        .right-info { flex: 1; }
+        .signature-table { page-break-inside: avoid; }
+        .signature-table td { text-align: center; font-weight: bold; vertical-align: top; }
+        .signature-name { margin-top: 50px; }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; color: white; font-size: 16px; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); }
+        #modalImage { display: block; margin: auto; max-width: 90%; max-height: 90vh; }
+        .close { position: absolute; right: 15px; top: 0; color: #f1f1f1; font-size: 40px; font-weight: bold; cursor: pointer; }
+        
+        @media print {
+            body { background-color: white; padding: 0; }
+            .print-controls, .modal, .loading-overlay { display: none !important; }
+            #demoWatermark { display: block !important; }
+            .container { max-width: none; width: 100%; margin: 0; padding: 0; box-shadow: none; border: none; }
+            .product-table tr, .bottom-section, .signature-table { page-break-inside: avoid; }
+            .dynamic-data { color: #004080 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+    <div class="print-controls">
+        <button class="download-btn" onclick="downloadPdf()" id="downloadBtn" disabled>💾 Tải về PDF</button>
+        <button class="print-btn" onclick="printDocument()" id="printBtn" disabled>🖨️ In đơn hàng</button>
+    </div>
+    <div id="imageModal" class="modal"><span class="close">&times;</span><img id="modalImage"></div>
+    <div id="loadingOverlay" class="loading-overlay"><p id="loadingText">Đang xử lý...</p></div>
+
+    <div class="container">
+        <div id="demoWatermark">ĐƠN HÀNG DEMO</div>
+        <div class="header"><div class="logo"><img src="https://poalninh.github.io/PostPrint/logo moc an-01.png" alt="Logo Mộc Ấn"></div></div>
+        <div class="title">ĐƠN ĐẶT HÀNG</div>
+        <div class="order-number">Số: <span id="soPhieu" class="dynamic-data"></span></div>
+        <table class="customer-info">
+            <tr><td colspan="2">Khách hàng: <strong id="tenKhachHang" class="dynamic-data"></strong></td><td>Ngày lập: <strong id="ngayLap" class="dynamic-data"></strong></td></tr>
+            <tr><td colspan="2">Địa chỉ giao: <strong id="diaChiGiao" class="dynamic-data"></strong></td><td>Người lập đơn: <strong id="nguoiLapDon" class="dynamic-data"></strong></td></tr>
+            <tr><td>Người nhận hàng: <strong id="nguoiNhanHang" class="dynamic-data"></strong></td><td>Số điện thoại: <strong id="soDienThoai" class="dynamic-data"></strong></td><td>Hình thức giao hàng: <strong id="hanGiaoHang" class="dynamic-data"></strong></td></tr>
+        </table>
+        <table class="product-table">
+            <thead><tr><th>STT</th><th>Tên sản phẩm</th><th>ĐVT</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th><th>Hình ảnh</th><th>Ghi chú</th></tr></thead>
+            <tbody id="productTableBody"></tbody>
+        </table>
+        <div class="bottom-section">
+             <div class="left-info"><p><strong>Ghi chú đơn hàng:</strong> <span id="ghiChuDonHang" class="dynamic-data" style="font-style: italic;"></span></p><p>- Số lượng giao hàng: ±10%</p><p>- Đối với những sản phẩm Túi nếu nguyên liệu của Quý khách có chứa hoạt chất có tính ăn mòn mạnh đề xuất Quý khách vui lòng dùng máy gia tốc test trước khi sản xuất sản phẩm hàng loạt.</p></div>
+             <!-- CẬP NHẬT: Thông tin ngân hàng động -->
+             <div class="right-info">
+                <p><strong>THÔNG TIN CHUYỂN KHOẢN:</strong></p>
+                <p><strong id="bankName" class="dynamic-data"></strong></p>
+                <p><strong>STK: </strong><strong id="bankStk" class="dynamic-data"></strong></p>
+                <p><strong id="bankBranch" class="dynamic-data"></strong></p>
+            </div>
+        </div>
+        <table class="signature-table">
+            <tr><td>XÁC NHẬN ĐƠN ĐẶT HÀNG</td><td>Phê duyệt</td><td>Người lập</td></tr>
+            <tr><td><div style="height: 50px;"></div></td><td><div class="signature-name dynamic-data" id="nguoiDuyet"></div></td><td><div class="signature-name dynamic-data" id="nguoiLapKy"></div></td></tr>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const populateHeader = (data) => {
+                document.title = data.so_dh || "Đơn Đặt Hàng"; 
+                document.getElementById('soPhieu').textContent = data.so_dh || ''; 
+                document.getElementById('tenKhachHang').textContent = data.ten_kh || '';
+                document.getElementById('ngayLap').textContent = formatDate(data.ngay_lap); 
+                document.getElementById('diaChiGiao').textContent = data.dia_chi_giao || ''; 
+                document.getElementById('nguoiLapDon').textContent = data.nguoi_lap_don || '';
+                document.getElementById('nguoiNhanHang').textContent = data.nguoi_nhan_hang || ''; 
+                document.getElementById('soDienThoai').textContent = data.sdt || ''; 
+                document.getElementById('hanGiaoHang').textContent = data.han_giao || ''; 
+                document.getElementById('ghiChuDonHang').textContent = data.ghi_chu_dh || ''; 
+                document.getElementById('nguoiDuyet').textContent = data.nguoi_duyet || ''; 
+                document.getElementById('nguoiLapKy').textContent = data.nguoi_lap_ky || '';
+                // CẬP NHẬT: Đổ dữ liệu ngân hàng
+                document.getElementById('bankName').textContent = data.bank_name || '';
+                document.getElementById('bankStk').textContent = data.bank_stk || '';
+                document.getElementById('bankBranch').textContent = data.bank_branch || '';
+            };
+
+            const populateProducts = (products, totals) => {
+                const tbody = document.getElementById('productTableBody'); tbody.innerHTML = ''; 
+                if (!products || products.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="warning">Không có sản phẩm nào.</td></tr>'; return; }
+                products.forEach((p, index) => { 
+                    // CẬP NHẬT: Thêm class .dynamic-data cho các ô dữ liệu
+                    tbody.insertAdjacentHTML('beforeend', `<tr>
+                        <td>${index + 1}</td>
+                        <td class="product-name dynamic-data">${p.masp || ''}</td>
+                        <td class="dynamic-data">${p.dvt || ''}</td>
+                        <td class="number dynamic-data">${formatNumber(p.sl_dat)}</td>
+                        <td class="number dynamic-data">${formatNumber(p.don_gia)}</td>
+                        <td class="number dynamic-data">${formatNumber(p.thanh_tien)}</td>
+                        <td><div class="product-image">${p.hinh_anh ? `<img src="${p.hinh_anh}" alt="Hình SP" data-src="${p.hinh_anh}" crossorigin="anonymous">` : '<div class="no-image">Không có</div>'}</div></td>
+                        <td class="notes-col dynamic-data">${p.ghi_chu || ''}</td>
+                    </tr>`); 
+                });
+                const vatPercent = (totals.vat_rate || 0) * 100;
+                tbody.insertAdjacentHTML('beforeend', `<tr class="total-row"><td colspan="5" style="text-align:right; padding-right:15px;">Cộng tiền hàng</td><td class="number dynamic-data">${formatNumber(totals.thanh_tien)}</td><td colspan="2"></td></tr><tr class="total-row"><td colspan="5" style="text-align:right; padding-right:15px;">VAT (${vatPercent}%)</td><td class="number dynamic-data">${formatNumber(totals.tien_vat)}</td><td colspan="2"></td></tr><tr class="total-row"><td colspan="5" style="text-align:right; padding-right:15px;">TỔNG CỘNG THANH TOÁN</td><td class="number dynamic-data">${formatNumber(totals.tong_tien)}</td><td colspan="2"></td></tr><tr><td colspan="8" style="text-align: left; font-style: italic; font-weight: bold;">Viết bằng chữ: <span class="dynamic-data">${numberToWords(totals.tong_tien)}</span></td></tr>`);
+            };
+
+            const generateDemoData = () => ({
+                so_dh: "DH-DEMO-001", ten_kh: "Công ty TNHH Khách Hàng Mẫu", ngay_lap: new Date().toISOString(), dia_chi_giao: "123 Đường Demo, Phường ABC, Quận XYZ, TP.HCM", nguoi_lap_don: "Nguyễn Văn Mẫu", nguoi_nhan_hang: "Trần Thị B", sdt: "0987654321", han_giao: "Giao hàng tận nơi", ghi_chu_dh: "Đây là ghi chú cho đơn hàng demo.", nguoi_duyet: "Lê Thị Giám Đốc", nguoi_lap_ky: "Nguyễn Văn Mẫu", 
+                thanh_tien: 3450000, vat_rate: 0.08, tien_vat: 276000, tong_tien: 3726000,
+                // CẬP NHẬT: Dữ liệu demo cho ngân hàng
+                bank_name: "CÔNG TY TNHH QUẢNG CÁO MỘC ẤN",
+                bank_stk: "157938519",
+                bank_branch: "Tại Ngân Hàng TMCP Á Châu, CN Phú Lâm, PGD Lê Văn Quới",
+                products: [{ masp: "SP001 - Hộp Giấy Carton", dvt: "Cái", sl_dat: 1500, don_gia: 1500, thanh_tien: 2250000, hinh_anh: "https://placehold.co/100x100/e74c3c/white?text=SP001", ghi_chu: "In offset 4 màu." },{ masp: "SP002 - Túi Giấy Kraft", dvt: "Cái", sl_dat: 2000, don_gia: 600, thanh_tien: 1200000, hinh_anh: "", ghi_chu: "Không quai." },]
+            });
+            
+            // Toàn bộ các hàm và logic còn lại giữ nguyên như phiên bản trước
+            const printBtn = document.getElementById('printBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const loadingText = document.getElementById('loadingText');
+            const imageModal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const closeModalBtn = document.querySelector('.close');
+            const formatNumber = (num) => (num === null || num === undefined || num === "") ? '' : new Intl.NumberFormat('vi-VN').format(num);
+            const formatDate = (dateString) => { if (!dateString) return ''; try { const date = new Date(dateString); if (isNaN(date.getTime())) return dateString; const day = String(date.getDate()).padStart(2, '0'); const month = String(date.getMonth() + 1).padStart(2, '0'); const year = date.getFullYear(); return `${day}/${month}/${year}`; } catch { return dateString; } };
+            const numberToWords = (num) => { if (num === null || num === undefined || num === 0) return 'Không đồng'; const units = ["", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"]; const tens = ["", "mười", "hai mươi", "ba mươi", "bốn mươi", "năm mươi", "sáu mươi", "bảy mươi", "tám mươi", "chín mươi"]; const scales = ["", "nghìn", "triệu", "tỷ"]; function convertChunk(n) {if (n === 0) return ""; if (n < 10) return units[n]; if (n < 20) return `mười ${units[n-10]}`; const ten = Math.floor(n / 10); const unit = n % 10; return tens[ten] + (unit > 0 ? ` ${units[unit]}` : '');} if (num === 0) return 'Không'; let result = ''; let scaleIndex = 0; while (num > 0) { const chunk = num % 1000; if (chunk > 0) result = `${convertChunk(chunk % 100)}`.trim() + (Math.floor(chunk / 100) > 0 ? ` ${units[Math.floor(chunk/100)]} trăm` : '') + ` ${scales[scaleIndex]} ` + result; num = Math.floor(num / 1000); scaleIndex++; } result = result.replace(/\s+/g, ' ').trim(); return result.charAt(0).toUpperCase() + result.slice(1) + ' đồng'; };
+            const showLoading = (text = 'Đang xử lý...') => { loadingText.textContent = text; loadingOverlay.style.display = 'flex'; };
+            const hideLoading = () => loadingOverlay.style.display = 'none';
+            const showError = (message) => { document.getElementById('productTableBody').innerHTML = `<tr><td colspan="8" class="error">❌ Lỗi: ${message}</td></tr>`; hideLoading(); };
+            const showImageModal = (src) => { modalImage.src = src; imageModal.style.display = 'block'; };
+            const hideImageModal = () => imageModal.style.display = 'none';
+            const waitForImages = () => Promise.all(Array.from(document.querySelectorAll('.product-image img')).filter(img => !img.complete).map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })));
+            window.printDocument = async () => { printBtn.disabled = true; await waitForImages(); window.print(); printBtn.disabled = false; };
+            window.downloadPdf = async () => {
+                downloadBtn.disabled = true; printBtn.disabled = true;
+                showLoading('Đang tạo file PDF...');
+                await waitForImages();
+                const element = document.querySelector('.container');
+                const orderId = document.getElementById('soPhieu').textContent || 'DonHang';
+                const opt = { margin: 0, filename: `${orderId}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }, pagebreak: { mode: 'avoid-all' } };
+                html2pdf().from(element).set(opt).save().catch(err => { console.error("Lỗi khi tạo PDF:", err); alert("Đã có lỗi xảy ra khi tạo file PDF. Vui lòng thử lại."); }).finally(() => { hideLoading(); downloadBtn.disabled = false; printBtn.disabled = false; });
+            };
+            const initializeApp = () => {
+                showLoading();
+                try {
+                    const urlParams = new URLSearchParams(window.location.search); const jsonData = urlParams.get('data'); let orderData;
+                    if (jsonData) { orderData = JSON.parse(decodeURIComponent(jsonData)); } else { document.getElementById('demoWatermark').style.display = 'block'; orderData = generateDemoData(); }
+                    const totals = { thanh_tien: orderData.thanh_tien, vat_rate: orderData.vat_rate, tien_vat: orderData.tien_vat, tong_tien: orderData.tong_tien };
+                    populateHeader(orderData); populateProducts(orderData.products, totals);
+                    printBtn.disabled = false; downloadBtn.disabled = false;
+                } catch (error) { console.error("Lỗi khởi tạo:", error); showError(error.message); } finally { hideLoading(); }
+            };
+            closeModalBtn.addEventListener('click', hideImageModal);
+            imageModal.addEventListener('click', (e) => (e.target === imageModal) && hideImageModal());
+            document.body.addEventListener('click', (e) => { if (e.target.tagName === 'IMG' && e.target.dataset.src) showImageModal(e.target.dataset.src); });
+            initializeApp();
+        });
+    </script>
+</body>
+</html>

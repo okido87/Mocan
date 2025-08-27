@@ -29,7 +29,6 @@
         .customer-info td, .product-table th, .product-table td, .signature-table td { border: 1px solid #000; padding: 6px 8px; vertical-align: middle; }
         .product-table th { background-color: #f2f2f2; font-weight: bold; }
         .product-name { text-align: left !important; width: 35%; }
-        /* CẬP NHẬT: Thêm style cho cột STT */
         .stt-col { text-align: center; }
         .product-image { width: 70px; height: 70px; margin: auto; display: flex; align-items: center; justify-content: center; background-color: #f0f0f0; }
         .product-image img { max-width: 100%; max-height: 100%; object-fit: contain; cursor: pointer; }
@@ -65,6 +64,7 @@
     <div id="loadingOverlay" class="loading-overlay"><p id="loadingText">Đang xử lý...</p></div>
 
     <div class="container">
+        <!-- HTML nội dung giữ nguyên -->
         <div id="demoWatermark">ĐƠN HÀNG DEMO</div>
         <div class="header"><div class="logo"><img src="https://poalninh.github.io/PostPrint/logo moc an-01.png" alt="Logo Mộc Ấn"></div></div>
         <div class="title">ĐƠN ĐẶT HÀNG</div>
@@ -75,25 +75,12 @@
             <tr><td style="width: 30%;">Người nhận hàng: <strong id="nguoiNhanHang" class="dynamic-data"></strong></td><td style="width: 30%;">Số điện thoại: <strong id="soDienThoai" class="dynamic-data"></strong></td><td>Hình thức giao hàng: <strong id="hanGiaoHang" class="dynamic-data"></strong></td></tr>
         </table>
         <table class="product-table">
-            <thead>
-                <tr>
-                    <!-- CẬP NHẬT: Thêm class cho header STT -->
-                    <th class="stt-col">STT</th>
-                    <th>Tên sản phẩm</th><th>ĐVT</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th><th>Hình ảnh</th><th>Ghi chú</th>
-                </tr>
-            </thead>
+            <thead><tr><th class="stt-col">STT</th><th>Tên sản phẩm</th><th>ĐVT</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th><th>Hình ảnh</th><th>Ghi chú</th></tr></thead>
             <tbody id="productTableBody"></tbody>
         </table>
         <div class="bottom-section">
              <div class="left-info"><p><strong>Ghi chú đơn hàng:</strong> <span id="ghiChuDonHang" class="dynamic-data" style="font-style: italic;"></span></p><p>- Số lượng giao hàng: <span id="dungSai" class="dynamic-data"></span></p><p>- Đối với những sản phẩm Túi nếu nguyên liệu của Quý khách có chứa hoạt chất có tính ăn mòn mạnh đề xuất Quý khách vui lòng dùng máy gia tốc test trước khi sản xuất sản phẩm hàng loạt.</p></div>
-             <div class="right-info">
-                <p><strong>THÔNG TIN CHUYỂN KHOẢN:</strong></p>
-                <p><strong id="bankName" class="dynamic-data"></strong></p>
-                <!-- CẬP NHẬT: Sửa label STK -->
-                <p><strong>Số tài khoản: </strong><strong id="bankStk" class="dynamic-data"></strong></p>
-                <!-- CẬP NHẬT: Thêm label Ngân hàng -->
-                <p><strong>Ngân hàng: </strong><strong id="bankBranch" class="dynamic-data"></strong></p>
-            </div>
+             <div class="right-info"><p><strong>THÔNG TIN CHUYỂN KHOẢN:</strong></p><p><strong id="bankName" class="dynamic-data"></strong></p><p><strong>Số tài khoản: </strong><strong id="bankStk" class="dynamic-data"></strong></p><p><strong>Ngân hàng: </strong><strong id="bankBranch" class="dynamic-data"></strong></p></div>
         </div>
         <table class="signature-table">
             <tr><td>XÁC NHẬN ĐƠN ĐẶT HÀNG</td><td>Phê duyệt</td><td>Người lập</td></tr>
@@ -103,6 +90,29 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            
+            // CẬP NHẬT: Thêm cấu hình AppSheet
+            const APP_CONFIG = {
+                appName: "MocAnSystem-777046908",
+                imageTableName: "DMSP", // Tên bảng chứa hình ảnh sản phẩm
+                baseUrl: "https://www.appsheet.com/image/getimageurl"
+            };
+
+            // CẬP NHẬT: Hàm xây dựng URL hình ảnh
+            const constructImageUrl = (fileName) => {
+                if (!fileName || typeof fileName !== 'string') return '';
+                // Xử lý trường hợp fileName đã là một URL đầy đủ (cho chế độ demo)
+                if (fileName.startsWith('http')) {
+                    return fileName;
+                }
+                const params = new URLSearchParams({
+                    appName: APP_CONFIG.appName,
+                    tableName: APP_CONFIG.imageTableName,
+                    fileName: fileName
+                });
+                return `${APP_CONFIG.baseUrl}?${params.toString()}`;
+            };
+
             const populateProducts = (products, totals) => {
                 const tbody = document.getElementById('productTableBody');
                 tbody.innerHTML = '';
@@ -110,7 +120,9 @@
                     tbody.innerHTML = '<tr><td colspan="8" class="warning">Không có sản phẩm nào.</td></tr>'; return;
                 }
                 products.forEach((p, index) => {
-                    // CẬP NHẬT: Thêm class cho ô dữ liệu STT
+                    // CẬP NHẬT: Gọi hàm để xây dựng URL hình ảnh
+                    const imageUrl = constructImageUrl(p.hinh_anh);
+
                     tbody.insertAdjacentHTML('beforeend', `<tr>
                         <td class="stt-col">${index + 1}</td>
                         <td class="product-name dynamic-data">${p.masp || ''}</td>
@@ -118,7 +130,7 @@
                         <td class="number dynamic-data">${formatNumber(p.sl_dat)}</td>
                         <td class="number dynamic-data">${formatNumber(p.don_gia)}</td>
                         <td class="number dynamic-data">${formatNumber(p.thanh_tien)}</td>
-                        <td><div class="product-image">${p.hinh_anh ? `<img src="${p.hinh_anh}" alt="Hình SP" data-src="${p.hinh_anh}" crossorigin="anonymous">` : '<div class="no-image">Không có</div>'}</div></td>
+                        <td><div class="product-image">${imageUrl ? `<img src="${imageUrl}" alt="Hình SP" data-src="${imageUrl}" crossorigin="anonymous">` : '<div class="no-image">Không có</div>'}</div></td>
                         <td class="notes-col dynamic-data">${p.ghi_chu || ''}</td>
                     </tr>`);
                 });
@@ -129,6 +141,15 @@
                 const vatPercent = vatRate * 100;
                 tbody.insertAdjacentHTML('beforeend', `<tr class="total-row"><td colspan="5" style="text-align:right; padding-right:15px;">Cộng tiền hàng</td><td class="number dynamic-data">${formatNumber(subTotal)}</td><td colspan="2"></td></tr><tr class="total-row"><td colspan="5" style="text-align:right; padding-right:15px;">VAT (<span class="dynamic-data">${vatPercent}%</span>)</td><td class="number dynamic-data">${formatNumber(vatAmount)}</td><td colspan="2"></td></tr><tr class="total-row"><td colspan="5" style="text-align:right; padding-right:15px;">TỔNG CỘNG THANH TOÁN</td><td class="number dynamic-data">${formatNumber(grandTotal)}</td><td colspan="2"></td></tr><tr><td colspan="8" style="text-align: left; font-style: italic; font-weight: bold;">Viết bằng chữ: <span class="dynamic-data">${numberToWords(grandTotal)}</span></td></tr>`);
             };
+
+            const generateDemoData = () => ({
+                so_dh: "DH-DEMO-001", ten_kh: "Công ty TNHH Khách Hàng Mẫu", ngay_lap: new Date().toISOString(), dia_chi_giao: "123 Đường Demo, Phường ABC, Quận XYZ, TP.HCM", nguoi_lap_don: "Nguyễn Văn Mẫu", nguoi_nhan_hang: "Trần Thị B", sdt: "0987654321", han_giao: "Giao hàng tận nơi", ghi_chu_dh: "Đây là ghi chú cho đơn hàng demo.", nguoi_duyet: "Lê Thị Giám Đốc", nguoi_lap_ky: "Nguyễn Văn Mẫu", thanh_tien: 3516480, vat_rate: 0.08, dung_sai: "±10%", bank_name: "CÔNG TY TNHH QUẢNG CÁO MỘC ẤN", bank_stk: "157938519", bank_branch: "Ngân hàng TMCP Á Châu, CN Phú Lâm", 
+                products: [
+                    // CẬP NHẬT: Dữ liệu hình ảnh demo
+                    { masp: "SP001 - Hộp Giấy Carton", dvt: "Cái", sl_dat: 1500, don_gia: 1500, thanh_tien: 2250000, hinh_anh: "https://placehold.co/100x100/e74c3c/white?text=SP001", ghi_chu: "In offset 4 màu." },
+                    { masp: "SP002 - Túi Giấy Kraft", dvt: "Cái", sl_dat: 2000, don_gia: 633.24, thanh_tien: 1266480, hinh_anh: "", ghi_chu: "Không quai." }
+                ]
+            });
 
             // Toàn bộ các hàm và logic còn lại giữ nguyên
             const printBtn = document.getElementById('printBtn'); const downloadBtn = document.getElementById('downloadBtn'); const loadingOverlay = document.getElementById('loadingOverlay'); const loadingText = document.getElementById('loadingText'); const imageModal = document.getElementById('imageModal'); const modalImage = document.getElementById('modalImage'); const closeModalBtn = document.querySelector('.close');
@@ -141,7 +162,6 @@
             const showImageModal = (src) => { modalImage.src = src; imageModal.style.display = 'block'; };
             const hideImageModal = () => imageModal.style.display = 'none';
             const populateHeader = (data) => { document.title = data.so_dh || "Đơn Đặt Hàng"; document.getElementById('soPhieu').textContent = data.so_dh || ''; document.getElementById('tenKhachHang').textContent = data.ten_kh || ''; document.getElementById('ngayLap').textContent = formatDate(data.ngay_lap); document.getElementById('diaChiGiao').textContent = data.dia_chi_giao || ''; document.getElementById('nguoiLapDon').textContent = data.nguoi_lap_don || ''; document.getElementById('nguoiNhanHang').textContent = data.nguoi_nhan_hang || ''; document.getElementById('soDienThoai').textContent = data.sdt || ''; document.getElementById('hanGiaoHang').textContent = data.han_giao || ''; document.getElementById('ghiChuDonHang').textContent = data.ghi_chu_dh || ''; document.getElementById('nguoiDuyet').textContent = data.nguoi_duyet || ''; document.getElementById('nguoiLapKy').textContent = data.nguoi_lap_ky || ''; document.getElementById('bankName').textContent = data.bank_name || ''; document.getElementById('bankStk').textContent = data.bank_stk || ''; document.getElementById('bankBranch').textContent = data.bank_branch || ''; document.getElementById('dungSai').textContent = data.dung_sai || '±10%'; };
-            const generateDemoData = () => ({ so_dh: "DH-DEMO-001", ten_kh: "Công ty TNHH Khách Hàng Mẫu", ngay_lap: new Date().toISOString(), dia_chi_giao: "123 Đường Demo, Phường ABC, Quận XYZ, TP.HCM", nguoi_lap_don: "Nguyễn Văn Mẫu", nguoi_nhan_hang: "Trần Thị B", sdt: "0987654321", han_giao: "Giao hàng tận nơi", ghi_chu_dh: "Đây là ghi chú cho đơn hàng demo.", nguoi_duyet: "Lê Thị Giám Đốc", nguoi_lap_ky: "Nguyễn Văn Mẫu", thanh_tien: 3516480, vat_rate: 0.08, dung_sai: "±10%", bank_name: "CÔNG TY TNHH QUẢNG CÁO MỘC ẤN", bank_stk: "157938519", bank_branch: "Ngân hàng TMCP Á Châu, CN Phú Lâm", products: [{ masp: "SP001 - Hộp Giấy Carton", dvt: "Cái", sl_dat: 1500, don_gia: 1500, thanh_tien: 2250000, hinh_anh: "https://placehold.co/100x100/e74c3c/white?text=SP001", ghi_chu: "In offset 4 màu." },{ masp: "SP002 - Túi Giấy Kraft", dvt: "Cái", sl_dat: 2000, don_gia: 633.24, thanh_tien: 1266480, hinh_anh: "", ghi_chu: "Không quai." },] });
             const waitForImages = () => Promise.all(Array.from(document.querySelectorAll('.product-image img')).filter(img => !img.complete).map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })));
             window.printDocument = async () => { printBtn.disabled = true; await waitForImages(); window.print(); printBtn.disabled = false; };
             window.downloadPdf = async () => { downloadBtn.disabled = true; printBtn.disabled = true; showLoading('Đang tạo file PDF...'); await waitForImages(); const element = document.querySelector('.container'); const orderId = document.getElementById('soPhieu').textContent || 'DonHang'; const opt = { margin: 0, filename: `${orderId}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }, pagebreak: { mode: 'avoid-all' } }; html2pdf().from(element).set(opt).save().catch(err => { console.error("Lỗi khi tạo PDF:", err); alert("Đã có lỗi xảy ra khi tạo file PDF. Vui lòng thử lại."); }).finally(() => { hideLoading(); downloadBtn.disabled = false; printBtn.disabled = false; }); };

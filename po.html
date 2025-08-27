@@ -89,68 +89,59 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // CẬP NHẬT: Thay thế hoàn toàn hàm numberToWords
-            const numberToWords = (number) => {
-                if (number === null || number === undefined || number === 0) return 'Không đồng';
-                const defaultNumbers = ' hai ba bốn năm sáu bảy tám chín';
-                const chuHangDonVi = (' không' + defaultNumbers).split(' ');
-                const chuHangChuc = (' lẺ mƯỜi' + defaultNumbers).split(' ');
-                const chuHangTram = (' không' + defaultNumbers).split(' ');
-                function convert_block_three(number) {
-                    number = parseInt(number, 10);
-                    if (number === 0) return '';
-                    const tram = Math.floor(number / 100);
-                    const chuc = Math.floor((number % 100) / 10);
-                    const donvi = number % 10;
-                    let chuoi = '';
-                    if (tram > 0) {
-                        chuoi += chuHangTram[tram] + ' trĂm';
-                        if (chuc === 0 && donvi !== 0) chuoi += ' linh';
-                    }
-                    if (chuc > 1) {
-                        chuoi += chuHangChuc[chuc] + ' ';
-                        if (donvi === 1) chuoi += 'mốt';
-                        else if (donvi === 5) chuoi += 'lăm';
-                        else if (donvi !== 0) chuoi += chuHangDonVi[donvi];
-                    } else if (chuc === 1) {
-                        chuoi += ' mƯỜi ';
-                        if (donvi === 5) chuoi += 'lăm';
-                        else if (donvi !== 0) chuoi += chuHangDonVi[donvi];
-                    } else if (donvi > 0) {
-                        chuoi += chuHangDonVi[donvi];
-                    }
-                    return chuoi;
-                }
-                const str = number.toString();
-                const re = /0/g;
-                let arr = str.replace(re, '').split('');
-                if (arr.length === 0) return 'Không đồng';
-
-                let i = str.length;
-                if (i === 0) return 'Không đồng';
-                let i_number = 0;
-                let arr_chuhangtrieu = ' tỶ triỆu nghìn'.split(' ');
-                let result = [];
-                let isZero = false;
-
-                do {
-                    let block = parseInt(str.substring(i - 3 > 0 ? i - 3 : 0, i), 10);
+            
+            // CẬP NHẬT: THAY THẾ HOÀN TOÀN HÀM numberToWords BỊ LỖI
+            const numberToWords = (s) => {
+                if (s === null || s === undefined || s === 0 || isNaN(s)) return 'Không đồng';
+                s = Math.floor(s).toString();
+                const a = ['', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+                const b = ['', 'mười', 'hai mươi', 'ba mươi', 'bốn mươi', 'năm mươi', 'sáu mươi', 'bảy mươi', 'tám mươi', 'chín mươi'];
+                const c = ['', 'trăm', 'nghìn', 'triệu', 'tỷ'];
+                let i = s.length;
+                if (i === 0) return '';
+                let d = [];
+                let e = 0;
+                while (i > 0) {
+                    d.push(s.substring(i, Math.max(0, i - 3)));
                     i -= 3;
-                    if (block !== 0) {
-                        result.push(convert_block_three(block));
-                        result.push(arr_chuhangtrieu[i_number]);
-                    } else if (isZero) {
-                        result.push('không');
+                }
+                for (let i = d.length - 1; i >= 0; i--) {
+                    if (d[i] !== '000') {
+                        e = i;
+                        break;
                     }
-                    i_number++;
-                } while (i > 0);
-
-                let final_result = result.reverse().join(' ').trim().replace(/\s+/g, ' ');
-                final_result = final_result.charAt(0).toUpperCase() + final_result.slice(1);
-                return final_result + ' đồng';
+                }
+                let f = '';
+                for (let i = d.length - 1; i >= 0; i--) {
+                    let g = d[i];
+                    if (g !== '000') {
+                        let j = parseInt(g, 10);
+                        let k = Math.floor(j / 100);
+                        let l = Math.floor((j % 100) / 10);
+                        let m = j % 10;
+                        f += (k > 0 ? a[k] + ' ' + c[1] + ' ' : '');
+                        if (l > 1) {
+                            f += b[l] + ' ';
+                            if (m === 1) f += 'mốt ';
+                            else if (m === 5) f += 'lăm ';
+                            else f += a[m] + ' ';
+                        } else if (l === 1) {
+                            f += b[1] + ' ';
+                            if (m === 5) f += 'lăm ';
+                            else f += a[m] + ' ';
+                        } else if (k > 0 || i < e) {
+                            if (m > 0) f += 'linh ' + a[m] + ' ';
+                        } else {
+                            f += a[m] + ' ';
+                        }
+                        f += c[i + 2] + ' ';
+                    }
+                }
+                f = f.replace(/\s+/g, ' ').trim();
+                f = f.charAt(0).toUpperCase() + f.slice(1);
+                return f + ' đồng';
             };
 
-            // CẬP NHẬT: Sửa đổi hàm populateProducts
             const populateProducts = (products, totals) => {
                 const tbody = document.getElementById('productTableBody');
                 tbody.innerHTML = '';
@@ -168,7 +159,6 @@
                 const grandTotal = subTotal + vatAmount;
                 const vatPercent = vatRate * 100;
 
-                // Sửa lỗi hiển thị màu VAT
                 tbody.insertAdjacentHTML('beforeend', `
                     <tr class="total-row"><td colspan="5" style="text-align:right; padding-right:15px;">Cộng tiền hàng</td><td class="number dynamic-data">${formatNumber(subTotal)}</td><td colspan="2"></td></tr>
                     <tr class="total-row"><td colspan="5" style="text-align:right; padding-right:15px;">VAT (<span class="dynamic-data">${vatPercent}%</span>)</td><td class="number dynamic-data">${formatNumber(vatAmount)}</td><td colspan="2"></td></tr>
@@ -186,7 +176,7 @@
             const showImageModal = (src) => { modalImage.src = src; imageModal.style.display = 'block'; };
             const hideImageModal = () => imageModal.style.display = 'none';
             const populateHeader = (data) => { document.title = data.so_dh || "Đơn Đặt Hàng"; document.getElementById('soPhieu').textContent = data.so_dh || ''; document.getElementById('tenKhachHang').textContent = data.ten_kh || ''; document.getElementById('ngayLap').textContent = formatDate(data.ngay_lap); document.getElementById('diaChiGiao').textContent = data.dia_chi_giao || ''; document.getElementById('nguoiLapDon').textContent = data.nguoi_lap_don || ''; document.getElementById('nguoiNhanHang').textContent = data.nguoi_nhan_hang || ''; document.getElementById('soDienThoai').textContent = data.sdt || ''; document.getElementById('hanGiaoHang').textContent = data.han_giao || ''; document.getElementById('ghiChuDonHang').textContent = data.ghi_chu_dh || ''; document.getElementById('nguoiDuyet').textContent = data.nguoi_duyet || ''; document.getElementById('nguoiLapKy').textContent = data.nguoi_lap_ky || ''; document.getElementById('bankName').textContent = data.bank_name || ''; document.getElementById('bankStk').textContent = data.bank_stk || ''; document.getElementById('bankBranch').textContent = data.bank_branch || ''; document.getElementById('dungSai').textContent = data.dung_sai || '±10%'; };
-            const generateDemoData = () => ({ so_dh: "DH-DEMO-001", ten_kh: "Công ty TNHH Khách Hàng Mẫu", ngay_lap: new Date().toISOString(), dia_chi_giao: "123 Đường Demo, Phường ABC, Quận XYZ, TP.HCM", nguoi_lap_don: "Nguyễn Văn Mẫu", nguoi_nhan_hang: "Trần Thị B", sdt: "0987654321", han_giao: "Giao hàng tận nơi", ghi_chu_dh: "Đây là ghi chú cho đơn hàng demo.", nguoi_duyet: "Lê Thị Giám Đốc", nguoi_lap_ky: "Nguyễn Văn Mẫu", thanh_tien: 3450000, vat_rate: 0.08, dung_sai: "±10%", bank_name: "CÔNG TY TNHH QUẢNG CÁO MỘC ẤN", bank_stk: "157938519", bank_branch: "Tại Ngân Hàng TMCP Á Châu, CN Phú Lâm, PGD Lê Văn Quới", products: [{ masp: "SP001 - Hộp Giấy Carton", dvt: "Cái", sl_dat: 1500, don_gia: 1500, thanh_tien: 2250000, hinh_anh: "https://placehold.co/100x100/e74c3c/white?text=SP001", ghi_chu: "In offset 4 màu." },{ masp: "SP002 - Túi Giấy Kraft", dvt: "Cái", sl_dat: 2000, don_gia: 600, thanh_tien: 1200000, hinh_anh: "", ghi_chu: "Không quai." },] });
+            const generateDemoData = () => ({ so_dh: "DH-DEMO-001", ten_kh: "Công ty TNHH Khách Hàng Mẫu", ngay_lap: new Date().toISOString(), dia_chi_giao: "123 Đường Demo, Phường ABC, Quận XYZ, TP.HCM", nguoi_lap_don: "Nguyễn Văn Mẫu", nguoi_nhan_hang: "Trần Thị B", sdt: "0987654321", han_giao: "Giao hàng tận nơi", ghi_chu_dh: "Đây là ghi chú cho đơn hàng demo.", nguoi_duyet: "Lê Thị Giám Đốc", nguoi_lap_ky: "Nguyễn Văn Mẫu", thanh_tien: 5100000, vat_rate: 0.08, dung_sai: "±10%", bank_name: "CÔNG TY TNHH QUẢNG CÁO MỘC ẤN", bank_stk: "157938519", bank_branch: "Tại Ngân Hàng TMCP Á Châu, CN Phú Lâm, PGD Lê Văn Quới", products: [{ masp: "SP001 - Hộp Giấy Carton", dvt: "Cái", sl_dat: 1500, don_gia: 1500, thanh_tien: 2250000, hinh_anh: "https://placehold.co/100x100/e74c3c/white?text=SP001", ghi_chu: "In offset 4 màu." },{ masp: "SP002 - Túi Giấy Kraft", dvt: "Cái", sl_dat: 2000, don_gia: 1425, thanh_tien: 2850000, hinh_anh: "", ghi_chu: "Không quai." },] });
             const waitForImages = () => Promise.all(Array.from(document.querySelectorAll('.product-image img')).filter(img => !img.complete).map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })));
             window.printDocument = async () => { printBtn.disabled = true; await waitForImages(); window.print(); printBtn.disabled = false; };
             window.downloadPdf = async () => { downloadBtn.disabled = true; printBtn.disabled = true; showLoading('Đang tạo file PDF...'); await waitForImages(); const element = document.querySelector('.container'); const orderId = document.getElementById('soPhieu').textContent || 'DonHang'; const opt = { margin: 0, filename: `${orderId}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }, pagebreak: { mode: 'avoid-all' } }; html2pdf().from(element).set(opt).save().catch(err => { console.error("Lỗi khi tạo PDF:", err); alert("Đã có lỗi xảy ra khi tạo file PDF. Vui lòng thử lại."); }).finally(() => { hideLoading(); downloadBtn.disabled = false; printBtn.disabled = false; }); };

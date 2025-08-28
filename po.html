@@ -8,23 +8,28 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Times New Roman', Times, serif; background-color: #f0f2f5; padding: 15px; font-size: 13px; }
-        .dynamic-data { color: #004080; font-weight: 600; }
-        .number.dynamic-data { color: #004080; }
+        
+        /* === SỬA LỖI 1: THAY ĐỔI MÀU CHỮ DYNAMIC VỀ MÀU ĐEN === */
+        .dynamic-data { 
+            color: #000000; /* Đổi thành màu đen */
+            font-weight: 600; 
+        }
+        /* Bỏ các dòng định nghĩa màu riêng lẻ để đảm bảo nhất quán */
+        /* .number.dynamic-data { color: #004080; } */
+        
         .container { 
             max-width: 210mm; margin: 0 auto; margin-top: 60px; background: white; 
             position: relative; z-index: 1; box-shadow: 0 0 8px rgba(0,0,0,0.1); 
             padding: 10mm; /* Padding này chỉ dành cho xem trên web */
         }
         #demoWatermark { 
-            display: none; /* <-- Luôn ẩn theo mặc định */
+            display: none;
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); 
             font-size: 120px; color: rgba(255, 0, 0, 0.08); font-weight: bold; z-index: 0; 
             pointer-events: none; text-align: center; white-space: nowrap; 
         }
-        
-        /* CẬP NHẬT: Thêm class để kích hoạt watermark */
         .container.watermark-active #demoWatermark {
-            display: block; /* Chỉ hiển thị watermark khi container có class này */
+            display: block;
         }
 
         .print-controls { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(5px); padding: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); display: flex; gap: 8px; justify-content: center; }
@@ -64,15 +69,17 @@
         @media print {
             body { background-color: white; padding: 0; }
             .print-controls, .modal, .loading-overlay { display: none !important; }
-            
-            /* CẬP NHẬT: Xóa bỏ dòng này để JS điều khiển */
-            /* #demoWatermark { display: block !important; } */
-            
             .container { max-width: none; width: 100%; margin: 0; padding: 10mm; box-shadow: none; border: none; }
             .product-table thead { display: table-header-group; }
             .product-table tbody tr { page-break-inside: avoid; }
             .customer-info, .bottom-section, .signature-table { page-break-inside: avoid; }
-            .dynamic-data { color: #004080 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            
+            /* === SỬA LỖI 1: THAY ĐỔI MÀU CHỮ KHI IN VỀ MÀU ĐEN === */
+            .dynamic-data { 
+                color: #000000 !important; /* Đổi thành màu đen khi in */
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+            }
         }
     </style>
 </head>
@@ -86,7 +93,6 @@
 
     <div class="container">
         <div id="demoWatermark">ĐƠN HÀNG DEMO</div>
-        <!-- Phần HTML còn lại giữ nguyên -->
         <div class="header"><div class="logo"><img src="https://poalninh.github.io/PostPrint/logo moc an-01.png" alt="Logo Mộc Ấn"></div></div>
         <div class="title">ĐƠN ĐẶT HÀNG</div>
         <div class="order-number">Số: <span id="soPhieu" class="dynamic-data"></span></div>
@@ -99,10 +105,23 @@
             <thead><tr><th class="stt-col">STT</th><th>Tên sản phẩm</th><th>ĐVT</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th><th>Hình ảnh</th><th>Ghi chú</th></tr></thead>
             <tbody id="productTableBody"></tbody>
         </table>
+        
+        <!-- === SỬA LỖI 2: CẬP NHẬT NỘI DUNG GHI CHÚ === -->
         <div class="bottom-section">
-             <div class="left-info"><p><strong>Ghi chú đơn hàng:</strong> <span id="ghiChuDonHang" class="dynamic-data" style="font-style: italic;"></span></p><p>- Số lượng giao hàng: <span id="dungSai" class="dynamic-data"></span></p><p>- Đối với những sản phẩm Túi nếu nguyên liệu của Quý khách có chứa hoạt chất có tính ăn mòn mạnh đề xuất Quý khách vui lòng dùng máy gia tốc test trước khi sản xuất sản phẩm hàng loạt.</p></div>
-             <div class="right-info"><p><strong>THÔNG TIN CHUYỂN KHOẢN:</strong></p><p><strong id="bankName" class="dynamic-data"></strong></p><p><strong>Số tài khoản: </strong><strong id="bankStk" class="dynamic-data"></strong></p><p><strong>Ngân hàng: </strong><strong id="bankBranch" class="dynamic-data"></strong></p></div>
+             <div class="left-info">
+                <p><strong>Ghi chú đơn hàng:</strong> <span id="ghiChuDonHang" class="dynamic-data" style="font-style: italic;"></span></p>
+                <p>- Số lượng giao hàng: ±10%</p>
+                <p>- Đối với những sản phẩm Túi nếu nguyên liệu của Quý khách có chứa hoạt chất có tính ăn mòn mạnh đề xuất Quý Khách vui lòng dùng máy gia tốc test trước khi sản xuất sản phẩm hàng loạt.</p>
+                <p>- Quý khách hàng vui lòng cung cấp đầy đủ thông tin Công ty và Mã số thuế để chúng tôi thuận tiện trong việc xuất hóa đơn tài chính sớm nhất.</p>
+             </div>
+             <div class="right-info">
+                <p><strong>THÔNG TIN CHUYỂN KHOẢN:</strong></p>
+                <p><strong id="bankName" class="dynamic-data"></strong></p>
+                <p><strong>Số tài khoản: </strong><strong id="bankStk" class="dynamic-data"></strong></p>
+                <p><strong>Ngân hàng: </strong><strong id="bankBranch" class="dynamic-data"></strong></p>
+             </div>
         </div>
+        
         <table class="signature-table">
             <tr><td>XÁC NHẬN ĐƠN ĐẶT HÀNG</td><td>Phê duyệt</td><td>Người lập</td></tr>
             <tr><td><div style="height: 50px;"></div></td><td><div class="signature-name dynamic-data" id="nguoiDuyet"></div></td><td><div class="signature-name dynamic-data" id="nguoiLapKy"></div></td></tr>
@@ -110,8 +129,8 @@
     </div>
 
     <script>
+        // Phần JavaScript không cần thay đổi gì, giữ nguyên như cũ.
         document.addEventListener('DOMContentLoaded', function() {
-            // Toàn bộ các hàm và logic còn lại giữ nguyên
             window.downloadPdf = async () => {
                 const downloadBtn = document.getElementById('downloadBtn');
                 const printBtn = document.getElementById('printBtn');
@@ -142,32 +161,28 @@
             const showError = (message) => { document.getElementById('productTableBody').innerHTML = `<tr><td colspan="8" class="error">❌ Lỗi: ${message}</td></tr>`; hideLoading(); };
             const showImageModal = (src) => { modalImage.src = src; imageModal.style.display = 'block'; };
             const hideImageModal = () => imageModal.style.display = 'none';
-            const populateHeader = (data) => { document.title = data.so_dh || "Đơn Đặt Hàng"; document.getElementById('soPhieu').textContent = data.so_dh || ''; document.getElementById('tenKhachHang').textContent = data.ten_kh || ''; document.getElementById('ngayLap').textContent = formatDate(data.ngay_lap); document.getElementById('diaChiGiao').textContent = data.dia_chi_giao || ''; document.getElementById('nguoiLapDon').textContent = data.nguoi_lap_don || ''; document.getElementById('nguoiNhanHang').textContent = data.nguoi_nhan_hang || ''; document.getElementById('soDienThoai').textContent = data.sdt || ''; document.getElementById('hanGiaoHang').textContent = data.han_giao || ''; document.getElementById('ghiChuDonHang').textContent = data.ghi_chu_dh || ''; document.getElementById('nguoiDuyet').textContent = data.nguoi_duyet || ''; document.getElementById('nguoiLapKy').textContent = data.nguoi_lap_ky || ''; document.getElementById('bankName').textContent = data.bank_name || ''; document.getElementById('bankStk').textContent = data.bank_stk || ''; document.getElementById('bankBranch').textContent = data.bank_branch || ''; document.getElementById('dungSai').textContent = data.dung_sai || '±10%'; };
+            const populateHeader = (data) => { document.title = data.so_dh || "Đơn Đặt Hàng"; document.getElementById('soPhieu').textContent = data.so_dh || ''; document.getElementById('tenKhachHang').textContent = data.ten_kh || ''; document.getElementById('ngayLap').textContent = formatDate(data.ngay_lap); document.getElementById('diaChiGiao').textContent = data.dia_chi_giao || ''; document.getElementById('nguoiLapDon').textContent = data.nguoi_lap_don || ''; document.getElementById('nguoiNhanHang').textContent = data.nguoi_nhan_hang || ''; document.getElementById('soDienThoai').textContent = data.sdt || ''; document.getElementById('hanGiaoHang').textContent = data.han_giao || ''; document.getElementById('ghiChuDonHang').textContent = data.ghi_chu_dh || ''; document.getElementById('nguoiDuyet').textContent = data.nguoi_duyet || ''; document.getElementById('nguoiLapKy').textContent = data.nguoi_lap_ky || ''; document.getElementById('bankName').textContent = data.bank_name || ''; document.getElementById('bankStk').textContent = data.bank_stk || ''; document.getElementById('bankBranch').textContent = data.bank_branch || ''; 
+                // Xóa dòng này vì giờ nội dung đã là cố định
+                // document.getElementById('dungSai').textContent = data.dung_sai || '±10%'; 
+            };
             const populateProducts = (products, totals) => { const tbody = document.getElementById('productTableBody'); tbody.innerHTML = ''; if (!products || products.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="warning">Không có sản phẩm nào.</td></tr>'; return; } const APP_CONFIG = { appName: "MocAnSystem-777046908", imageTableName: "DMSP", baseUrl: "https://www.appsheet.com/image/getimageurl" }; const constructImageUrl = (fileName) => { if (!fileName || typeof fileName !== 'string') return ''; if (fileName.startsWith('http')) { return fileName; } const params = new URLSearchParams({ appName: APP_CONFIG.appName, tableName: APP_CONFIG.imageTableName, fileName: fileName }); return `${APP_CONFIG.baseUrl}?${params.toString()}`; }; products.forEach((p, index) => { const imageUrl = constructImageUrl(p.hinh_anh); tbody.insertAdjacentHTML('beforeend', `<tr><td class="stt-col">${index + 1}</td><td class="product-name dynamic-data">${p.masp || ''}</td><td class="dynamic-data">${p.dvt || ''}</td><td class="number dynamic-data">${formatNumber(p.sl_dat)}</td><td class="number dynamic-data">${formatNumber(p.don_gia)}</td><td class="number dynamic-data">${formatNumber(p.thanh_tien)}</td><td><div class="product-image">${imageUrl ? `<img src="${imageUrl}" alt="Hình SP" data-src="${imageUrl}" crossorigin="anonymous">` : '<div class="no-image">Không có</div>'}</div></td><td class="notes-col dynamic-data">${p.ghi_chu || ''}</td></tr>`); }); const subTotal = totals.thanh_tien || 0; const vatRate = totals.vat_rate || 0; const vatAmount = subTotal * vatRate; const grandTotal = subTotal + vatAmount; const vatPercent = vatRate * 100; tbody.insertAdjacentHTML('beforeend', `<tr class="total-row"><td colspan="5" style="text-align:right; padding-right:15px;">Cộng tiền hàng</td><td class="number dynamic-data">${formatNumber(subTotal)}</td><td colspan="2"></td></tr><tr class="total-row"><td colspan="5" style="text-align:right; padding-right:15px;">VAT (<span class="dynamic-data">${vatPercent}%</span>)</td><td class="number dynamic-data">${formatNumber(vatAmount)}</td><td colspan="2"></td></tr><tr class="total-row"><td colspan="5" style="text-align:right; padding-right:15px;">TỔNG CỘNG THANH TOÁN</td><td class="number dynamic-data">${formatNumber(grandTotal)}</td><td colspan="2"></td></tr><tr><td colspan="8" style="text-align: left; font-style: italic; font-weight: bold;">Viết bằng chữ: <span class="dynamic-data">${numberToWords(grandTotal)}</span></td></tr>`); };
-            const generateDemoData = () => ({ so_dh: "DH-DEMO-001", ten_kh: "Công ty TNHH Khách Hàng Mẫu", ngay_lap: new Date().toISOString(), dia_chi_giao: "123 Đường Demo, Phường ABC, Quận XYZ, TP.HCM", nguoi_lap_don: "Nguyễn Văn Mẫu", nguoi_nhan_hang: "Trần Thị B", sdt: "0987654321", han_giao: "Giao hàng tận nơi", ghi_chu_dh: "Đây là ghi chú cho đơn hàng demo.", nguoi_duyet: "Lê Thị Giám Đốc", nguoi_lap_ky: "Nguyễn Văn Mẫu", thanh_tien: 3516480, vat_rate: 0.08, dung_sai: "±10%", bank_name: "CÔNG TY TNHH QUẢNG CÁO MỘC ẤN", bank_stk: "157938519", bank_branch: "Ngân hàng TMCP Á Châu, CN Phú Lâm", products: [{ masp: "SP001 - Hộp Giấy Carton", dvt: "Cái", sl_dat: 1500, don_gia: 1500, thanh_tien: 2250000, hinh_anh: "https://placehold.co/100x100/e74c3c/white?text=SP001", ghi_chu: "In offset 4 màu." },{ masp: "SP002 - Túi Giấy Kraft", dvt: "Cái", sl_dat: 2000, don_gia: 633.24, thanh_tien: 1266480, hinh_anh: "", ghi_chu: "Không quai." },] });
+            const generateDemoData = () => ({ so_dh: "DH-DEMO-001", ten_kh: "Công ty TNHH Khách Hàng Mẫu", ngay_lap: new Date().toISOString(), dia_chi_giao: "123 Đường Demo, Phường ABC, Quận XYZ, TP.HCM", nguoi_lap_don: "Nguyễn Văn Mẫu", nguoi_nhan_hang: "Trần Thị B", sdt: "0987654321", han_giao: "Giao hàng tận nơi", ghi_chu_dh: "Đây là ghi chú cho đơn hàng demo.", nguoi_duyet: "Lê Thị Giám Đốc", nguoi_lap_ky: "Nguyễn Văn Mẫu", thanh_tien: 3516480, vat_rate: 0.08, bank_name: "CÔNG TY TNHH QUẢNG CÁO MỘC ẤN", bank_stk: "157938519", bank_branch: "Ngân hàng TMCP Á Châu, CN Phú Lâm", products: [{ masp: "SP001 - Hộp Giấy Carton", dvt: "Cái", sl_dat: 1500, don_gia: 1500, thanh_tien: 2250000, hinh_anh: "https://placehold.co/100x100/e74c3c/white?text=SP001", ghi_chu: "In offset 4 màu." },{ masp: "SP002 - Túi Giấy Kraft", dvt: "Cái", sl_dat: 2000, don_gia: 633.24, thanh_tien: 1266480, hinh_anh: "", ghi_chu: "Không quai." },] });
             const waitForImages = () => Promise.all(Array.from(document.querySelectorAll('.product-image img')).filter(img => !img.complete).map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })));
             window.printDocument = async () => { printBtn.disabled = true; await waitForImages(); window.print(); printBtn.disabled = false; };
-            
-            // CẬP NHẬT: Sửa đổi hàm initializeApp
             const initializeApp = () => {
                 showLoading();
                 try {
                     const urlParams = new URLSearchParams(window.location.search);
                     const jsonData = urlParams.get('data');
                     let orderData;
-                    
                     const container = document.querySelector('.container');
-
                     if (jsonData) {
-                        // Có dữ liệu thật -> ẩn watermark
                         orderData = JSON.parse(decodeURIComponent(jsonData));
-                        container.classList.remove('watermark-active'); // Đảm bảo watermark bị tắt
+                        container.classList.remove('watermark-active');
                     } else {
-                        // Không có dữ liệu -> Chế độ DEMO -> hiện watermark
                         orderData = generateDemoData();
-                        container.classList.add('watermark-active'); // Kích hoạt watermark
+                        container.classList.add('watermark-active');
                     }
-                    
                     const totals = { thanh_tien: orderData.thanh_tien, vat_rate: orderData.vat_rate };
                     populateHeader(orderData);
                     populateProducts(orderData.products, totals);
@@ -180,7 +195,6 @@
                     hideLoading();
                 }
             };
-            
             closeModalBtn.addEventListener('click', hideImageModal);
             imageModal.addEventListener('click', (e) => (e.target === imageModal) && hideImageModal());
             document.body.addEventListener('click', (e) => { if (e.target.tagName === 'IMG' && e.target.dataset.src) showImageModal(e.target.dataset.src); });

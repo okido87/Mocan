@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng Báo Giá</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Times New Roman', Times, serif; background-color: #f0f2f5; padding: 15px; font-size: 13px; line-height: 1.4; color: #000; }
+        .dynamic-data { font-weight: bold; }
+        .container { 
+            max-width: 210mm; margin: 0 auto; margin-top: 60px; /* Thêm lại margin top cho máy tính */
+            background: white; box-shadow: 0 0 8px rgba(0,0,0,0.1); 
+            padding: 10mm; /* Padding này sẽ được xóa khi tạo PDF */
+        }
+        
+        /* === THÊM LẠI: NÚT ĐIỀU KHIỂN & LOADING OVERLAY === */
+        .print-controls { 
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; 
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(5px); 
+            padding: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); 
+            display: flex; gap: 8px; justify-content: center; 
+        }
+        .print-btn, .download-btn { 
+            border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; 
+            font-size: 14px; font-weight: bold; flex-grow: 1; max-width: 200px; 
+        }
+        @media (min-width: 768px) {
+            .container { margin-top: 0; }
+            .print-controls { 
+                top: 20px; right: 20px; left: auto; width: auto; 
+                flex-direction: column; gap: 10px; 
+            }
+            .print-btn, .download-btn { padding: 12px 25px; flex-grow: 0; }
+        }
+        .print-btn { background: #e74c3c; color: white; }
+        .download-btn { background: #3498db; color: white; }
+        .print-btn:disabled, .download-btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+        .loading-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0, 0, 0, 0.6); display: none; /* Ẩn mặc định */
+            flex-direction: column; justify-content: center; align-items: center; 
+            z-index: 9999; color: white; font-size: 16px; 
+        }
+
+        /* Các style khác giữ nguyên */
+        .header .logo img { max-width: 100%; }
+        .title { text-align: center; font-size: 23px; font-weight: bold; margin: 20px 0 5px 0; letter-spacing: 2px; }
+        .quote-number { text-align: center; font-size: 13px; margin-bottom: 20px; font-weight: bold; }
+        .info-table, .product-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .info-table td { padding: 4px 0; }
+        .info-table .label { width: 120px; }
+        .product-table th, .product-table td { border: 1px solid #000; padding: 6px 8px; vertical-align: middle; text-align: center; }
+        .product-table th { background-color: #f2f2f2; font-weight: bold; }
+        .product-table .left-align { text-align: left; }
+        .product-table .product-spec { white-space: pre-wrap; }
+        .product-table .product-name-spec strong { display: block; margin-bottom: 4px; }
+        .product-table .number { text-align: right; }
+        .product-image { width: 100px; height: 50px; margin: auto; display: flex; align-items: center; justify-content: center; }
+        .product-image img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .notes-section { margin-bottom: 30px; }
+        .notes-section h4 { margin-bottom: 5px; }
+        .signature-section { text-align: center; }
+        .signature-date { margin-bottom: 15px; font-style: italic; }
+        .signature-title { font-weight: bold; }
+
+        @media print {
+            body { background-color: white; padding: 0; }
+            .print-controls, .loading-overlay { display: none !important; }
+            .container { max-width: none; width: 100%; margin: 0; padding: 0; box-shadow: none; border: none; }
+            .product-table thead { display: table-header-group; }
+            /* === THÊM LẠI: TỐI ƯU NGẮT TRANG KHI IN === */
+            .product-table tbody tr, .info-table, .notes-section, .signature-section { 
+                page-break-inside: avoid; 
+            }
+            .dynamic-data, .label { color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+    <!-- === THÊM LẠI: CÁC NÚT ĐIỀU KHIỂN VÀ OVERLAY === -->
+    <div class="print-controls">
+        <button class="download-btn" onclick="downloadPdf()" id="downloadBtn" disabled>💾 Tải về PDF</button>
+        <button class="print-btn" onclick="printDocument()" id="printBtn" disabled>🖨️ In Báo Giá</button>
+    </div>
+    <div id="loadingOverlay" class="loading-overlay"><p id="loadingText">Đang xử lý...</p></div>
+
+    <div class="container" id="invoice">
+        <!-- Nội dung báo giá giữ nguyên -->
+        <div class="header"> <div class="logo"><img src="https://poalninh.github.io/PostPrint/logo moc an-01.png" alt="Logo Mộc Ấn"></div> </div>
+        <div class="title">BẢNG BÁO GIÁ</div>
+        <div class="quote-number">Số: <span id="soBG" class="dynamic-data"></span></div>
+        <table class="info-table"> <tr><td class="label">Kính gửi:</td><td><strong id="kinhGui" class="dynamic-data"></strong></td></tr> <tr><td class="label">Khách hàng:</td><td><strong id="tenKhachHang" class="dynamic-data"></strong></td><td style="width: 100px; text-align: right;">NV KD:</td><td style="width: 200px; text-align: right;"><strong id="nvKD" class="dynamic-data"></strong></td></tr> <tr><td class="label">Địa chỉ giao:</td><td><strong id="diaChiGiao" class="dynamic-data"></strong></td></tr> <tr><td class="label">Điện thoại:</td><td><strong id="dienThoai" class="dynamic-data"></strong></td><td style="width: 100px; text-align: right;">Thời hạn BG:</td><td style="width: 200px; text-align: right;"><strong id="thoiHanBG" class="dynamic-data"></strong></td></tr> </table>
+        <p>Chúng tôi xin trân trọng báo với Quý Khách giá tham khảo các mặt hàng cụ thể như bảng đính kèm sau:</p>
+        <table class="product-table"> <thead> <tr> <th style="width: 4%;">Stt</th> <th style="width: 40%;">Tên & Quy cách sản phẩm</th> <th style="width: 5%;">Đvt</th> <th style="width: 7%;">Số lượng</th> <th style="width: 10%;">Đơn giá<br>(VNĐ)</th> <th style="width: 10%;">Thành tiền<br>(VNĐ)</th> <th style="width: 10%;">CP Thiết kế<br>(VNĐ)</th> <th>Hình ảnh</th> <th>Ghi chú</th> </tr> </thead> <tbody id="productTableBody"></tbody> </table>
+        <div class="notes-section"> <h4>Ghi chú:</h4> <div id="ghiChuList"></div> </div>
+        <div class="signature-section"> <div class="signature-date" id="ngayThangNam"></div> <div class="signature-title">XÁC NHẬN CỦA CÔNG TY</div> </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // === THÊM LẠI: LẤY CÁC ELEMENT CẦN THIẾT ===
+            const printBtn = document.getElementById('printBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const loadingText = document.getElementById('loadingText');
+
+            const formatNumber = (num) => (num === null || num === undefined || num === "" || num === 0) ? '' : new Intl.NumberFormat('vi-VN').format(num);
+
+            // === THÊM LẠI: CÁC HÀM TIỆN ÍCH CHO IN/TẢI FILE ===
+            const showLoading = (text = 'Đang xử lý...') => { loadingText.textContent = text; loadingOverlay.style.display = 'flex'; };
+            const hideLoading = () => loadingOverlay.style.display = 'none';
+            // Hàm này đảm bảo mọi hình ảnh đã tải xong trước khi in/tạo PDF
+            const waitForImages = () => Promise.all(
+                Array.from(document.querySelectorAll('.product-image img'))
+                     .filter(img => !img.complete)
+                     .map(img => new Promise(resolve => { img.onload = img.onerror = resolve; }))
+            );
+
+            // Gán hàm vào window object để HTML có thể gọi
+            window.printDocument = async () => {
+                printBtn.disabled = true;
+                downloadBtn.disabled = true;
+                showLoading('Đang chuẩn bị bản in...');
+                await waitForImages();
+                hideLoading();
+                window.print();
+                printBtn.disabled = false;
+                downloadBtn.disabled = false;
+            };
+
+            window.downloadPdf = async () => {
+                printBtn.disabled = true;
+                downloadBtn.disabled = true;
+                showLoading('Đang tạo file PDF...');
+                
+                await waitForImages();
+
+                const element = document.getElementById('invoice');
+                const originalPadding = element.style.padding;
+                element.style.padding = '0'; // Xóa padding để PDF vừa khít trang A4
+
+                const orderId = document.getElementById('soBG').textContent || 'BaoGia';
+                
+                const opt = {
+                    margin: 10,
+                    filename: `${orderId}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, logging: false },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } // Tối ưu ngắt trang
+                };
+
+                html2pdf().from(element).set(opt).save().catch(err => {
+                    console.error("Lỗi khi tạo PDF:", err);
+                    alert("Đã có lỗi xảy ra khi tạo file PDF. Vui lòng thử lại.");
+                }).finally(() => {
+                    element.style.padding = originalPadding; // Trả lại padding sau khi xong
+                    hideLoading();
+                    printBtn.disabled = false;
+                    downloadBtn.disabled = false;
+                });
+            };
+            
+            function populateData(data) {
+                document.title = `Báo giá ${data.so_bg || ''}`;
+                document.getElementById('soBG').textContent = data.so_bg || '';
+                document.getElementById('kinhGui').textContent = data.ten_kh || '';
+                document.getElementById('tenKhachHang').textContent = data.ten_kh || '';
+                document.getElementById('nvKD').textContent = data.nv_kd || '';
+                document.getElementById('diaChiGiao').textContent = data.dia_chi_giao || '';
+                document.getElementById('dienThoai').textContent = data.sdt_kh || '';
+                document.getElementById('thoiHanBG').textContent = data.thoi_han_bg || '';
+                if (data.ngay_bg) { const dateParts = data.ngay_bg.split('/'); if (dateParts.length === 3) { document.getElementById('ngayThangNam').textContent = `Tp.HCM, ngày ${dateParts[0]} tháng ${dateParts[1]} năm ${dateParts[2]}`; } else { document.getElementById('ngayThangNam').textContent = `Tp.HCM, ngày ... tháng ... năm ...`; } }
+
+                const tbody = document.getElementById('productTableBody');
+                tbody.innerHTML = '';
+                if (data.products && data.products.length > 0) {
+                    data.products.forEach((p, index) => {
+                        const imageUrl = p.hinh_anh ? (p.hinh_anh.startsWith('http') ? p.hinh_anh : `https://www.appsheet.com/image/getimageurl?appName=YOUR_APP_NAME-12345&tableName=CTBaoGia&fileName=${encodeURIComponent(p.hinh_anh)}`) : '';
+                        const tenVaQuyCachHTML = `<div class="product-name-spec"><strong>${p.ten_sp || ''}</strong><span class="product-spec">${p.quy_cach_sp || ''}</span></div>`;
+                        const row = `<tr><td>${index + 1}</td><td class="left-align">${tenVaQuyCachHTML}</td><td>${p.dvt || ''}</td><td class="number">${formatNumber(p.so_luong)}</td><td class="number">${formatNumber(p.don_gia)}</td><td class="number">${formatNumber(p.thanh_tien)}</td><td class="number">${formatNumber(p.cp_thiet_ke)}</td><td><div class="product-image">${imageUrl ? `<img src="${imageUrl}" alt="Hình SP" crossorigin="anonymous">` : ''}</div></td><td>${p.ghi_chu_sp || ''}</td></tr>`;
+                        tbody.insertAdjacentHTML('beforeend', row);
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="9">Không có sản phẩm nào.</td></tr>';
+                }
+
+                const notesContainer = document.getElementById('ghiChuList');
+                notesContainer.innerHTML = '';
+                if (data.ghi_chu_bg && data.ghi_chu_bg.length > 0) {
+                    data.ghi_chu_bg.forEach(note => {
+                        notesContainer.insertAdjacentHTML('beforeend', `<p>- ${note.replace(/^\*/, '').trim()}</p>`);
+                    });
+                }
+            }
+            
+            // Hàm khởi tạo chính
+            const initializeApp = () => {
+                showLoading('Đang tải dữ liệu báo giá...');
+                try {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const jsonData = urlParams.get('data'); 
+                    if (jsonData) {
+                        const decodedData = decodeURIComponent(jsonData);
+                        const orderData = JSON.parse(decodedData);
+                        populateData(orderData);
+                    } else {
+                        console.log("Không tìm thấy dữ liệu, đang chạy dữ liệu mẫu.");
+                        const demoData = { "so_bg": "BG-DEMO-001", "ngay_bg": "14/05/2025", "ten_kh": "CÔNG TY TNHH PHÂN BÓN AN DÂN (DEMO)", "dia_chi_giao": "32 ấp Mới 1, Tân Xuân, Hóc Môn, Hồ Chí Minh", "sdt_kh": "", "thoi_han_bg": "13/06/2025", "nv_kd": "Hồ Vũ Khánh Thư", "ghi_chu_bg": [ "* Bảng báo giá chỉ có giá trị đến 13/06/2025!", "* Giá trên chưa bao gồm 0% VAT", "* Đơn hàng giá trị trên 2 triệu hỗ trợ giao hàng miễn phí khu vực Tp Hồ Chí Minh. Đơn giá chưa tính phí vận chuyển tỉnh.", "* Thời gian giao hàng:", "* Đặt cọc: 50% giá trị đơn hàng", "* Thời hạn thanh toán: Ngay khi giao hàng", "* Tài khoản thanh toán:" ], "products": [ { "ten_sp": "Nhãn BIO - COCO - 500ml", "quy_cach_sp": "Quy cách: 24.5x9.2 cm\nChất liệu: Couche\nIn Offset 4 Màu 1 Mặt...", "dvt": "cái", "so_luong": 2000, "don_gia": 239, "thanh_tien": 478000, "cp_thiet_ke": null, "hinh_anh": "https://placehold.co/100x50/3498db/white?text=SP1", "ghi_chu_sp": "" }, { "ten_sp": "Nhãn CANXI BO SỮA - 250ml", "quy_cach_sp": "Quy cách: 21x7.2 cm\nChất liệu: Couche...", "dvt": "cái", "so_luong": 2000, "don_gia": 160, "thanh_tien": 320000, "cp_thiet_ke": 0, "hinh_anh": "https://placehold.co/100x50/2ecc71/white?text=SP2", "ghi_chu_sp": "Gấp" } ] };
+                        populateData(demoData);
+                    }
+                    // Bật các nút sau khi dữ liệu đã được nạp
+                    printBtn.disabled = false;
+                    downloadBtn.disabled = false;
+                } catch (error) {
+                    console.error("Lỗi khi xử lý dữ liệu:", error);
+                    document.body.innerHTML = `<h1>Lỗi xử lý dữ liệu</h1><p>${error.message}</p>`;
+                } finally {
+                    hideLoading();
+                }
+            };
+            
+            initializeApp();
+        });
+    </script>
+</body>
+</html>

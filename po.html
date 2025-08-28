@@ -15,7 +15,18 @@
             position: relative; z-index: 1; box-shadow: 0 0 8px rgba(0,0,0,0.1); 
             padding: 10mm; /* Padding này chỉ dành cho xem trên web */
         }
-        #demoWatermark { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 120px; color: rgba(255, 0, 0, 0.08); font-weight: bold; z-index: 0; pointer-events: none; text-align: center; white-space: nowrap; }
+        #demoWatermark { 
+            display: none; /* <-- Luôn ẩn theo mặc định */
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); 
+            font-size: 120px; color: rgba(255, 0, 0, 0.08); font-weight: bold; z-index: 0; 
+            pointer-events: none; text-align: center; white-space: nowrap; 
+        }
+        
+        /* CẬP NHẬT: Thêm class để kích hoạt watermark */
+        .container.watermark-active #demoWatermark {
+            display: block; /* Chỉ hiển thị watermark khi container có class này */
+        }
+
         .print-controls { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(5px); padding: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); display: flex; gap: 8px; justify-content: center; }
         .print-btn, .download-btn { border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold; flex-grow: 1; max-width: 200px; }
         @media (min-width: 768px) {
@@ -53,8 +64,11 @@
         @media print {
             body { background-color: white; padding: 0; }
             .print-controls, .modal, .loading-overlay { display: none !important; }
-            #demoWatermark { display: block !important; }
-            .container { max-width: none; width: 100%; margin: 0; padding: 10mm; /* Giữ lại lề khi in */ box-shadow: none; border: none; }
+            
+            /* CẬP NHẬT: Xóa bỏ dòng này để JS điều khiển */
+            /* #demoWatermark { display: block !important; } */
+            
+            .container { max-width: none; width: 100%; margin: 0; padding: 10mm; box-shadow: none; border: none; }
             .product-table thead { display: table-header-group; }
             .product-table tbody tr { page-break-inside: avoid; }
             .customer-info, .bottom-section, .signature-table { page-break-inside: avoid; }
@@ -71,8 +85,8 @@
     <div id="loadingOverlay" class="loading-overlay"><p id="loadingText">Đang xử lý...</p></div>
 
     <div class="container">
-        <!-- HTML nội dung giữ nguyên -->
         <div id="demoWatermark">ĐƠN HÀNG DEMO</div>
+        <!-- Phần HTML còn lại giữ nguyên -->
         <div class="header"><div class="logo"><img src="https://poalninh.github.io/PostPrint/logo moc an-01.png" alt="Logo Mộc Ấn"></div></div>
         <div class="title">ĐƠN ĐẶT HÀNG</div>
         <div class="order-number">Số: <span id="soPhieu" class="dynamic-data"></span></div>
@@ -97,42 +111,28 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            
-            // CẬP NHẬT: Sửa lại hàm downloadPdf
+            // Toàn bộ các hàm và logic còn lại giữ nguyên
             window.downloadPdf = async () => {
+                const downloadBtn = document.getElementById('downloadBtn');
+                const printBtn = document.getElementById('printBtn');
                 downloadBtn.disabled = true; printBtn.disabled = true;
                 showLoading('Đang tạo file PDF...');
-                
                 await waitForImages();
-
                 const element = document.querySelector('.container');
                 const orderId = document.getElementById('soPhieu').textContent || 'DonHang';
-                
-                const opt = {
-                    margin:       15, // Lề 15mm cho tất cả các cạnh
-                    filename:     `${orderId}.pdf`,
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true },
-                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                    // Bỏ pagebreak: { mode: 'avoid-all' } để cho phép ngắt trang tự động
-                };
-
-                // Tạm thời bỏ padding của container để html2pdf toàn quyền kiểm soát lề
+                const opt = { margin: 10, filename: `${orderId}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
                 element.style.padding = '0';
-
                 html2pdf().from(element).set(opt).save().catch(err => {
                     console.error("Lỗi khi tạo PDF:", err);
                     alert("Đã có lỗi xảy ra khi tạo file PDF. Vui lòng thử lại.");
                 }).finally(() => {
-                    // Trả lại padding sau khi hoàn tất để hiển thị trên web đúng
-                    element.style.padding = '15mm';
+                    element.style.padding = '10mm';
                     hideLoading();
                     downloadBtn.disabled = false;
                     printBtn.disabled = false;
                 });
             };
-
-            // Toàn bộ các hàm và logic còn lại giữ nguyên
+            
             const printBtn = document.getElementById('printBtn'); const downloadBtn = document.getElementById('downloadBtn'); const loadingOverlay = document.getElementById('loadingOverlay'); const loadingText = document.getElementById('loadingText'); const imageModal = document.getElementById('imageModal'); const modalImage = document.getElementById('modalImage'); const closeModalBtn = document.querySelector('.close');
             const formatNumber = (num) => (num === null || num === undefined || num === "") ? '' : new Intl.NumberFormat('vi-VN').format(num);
             const formatDate = (dateString) => { if (!dateString) return ''; try { const date = new Date(dateString); if (isNaN(date.getTime())) return dateString; const day = String(date.getDate()).padStart(2, '0'); const month = String(date.getMonth() + 1).padStart(2, '0'); const year = date.getFullYear(); return `${day}/${month}/${year}`; } catch { return dateString; } };
@@ -147,7 +147,40 @@
             const generateDemoData = () => ({ so_dh: "DH-DEMO-001", ten_kh: "Công ty TNHH Khách Hàng Mẫu", ngay_lap: new Date().toISOString(), dia_chi_giao: "123 Đường Demo, Phường ABC, Quận XYZ, TP.HCM", nguoi_lap_don: "Nguyễn Văn Mẫu", nguoi_nhan_hang: "Trần Thị B", sdt: "0987654321", han_giao: "Giao hàng tận nơi", ghi_chu_dh: "Đây là ghi chú cho đơn hàng demo.", nguoi_duyet: "Lê Thị Giám Đốc", nguoi_lap_ky: "Nguyễn Văn Mẫu", thanh_tien: 3516480, vat_rate: 0.08, dung_sai: "±10%", bank_name: "CÔNG TY TNHH QUẢNG CÁO MỘC ẤN", bank_stk: "157938519", bank_branch: "Ngân hàng TMCP Á Châu, CN Phú Lâm", products: [{ masp: "SP001 - Hộp Giấy Carton", dvt: "Cái", sl_dat: 1500, don_gia: 1500, thanh_tien: 2250000, hinh_anh: "https://placehold.co/100x100/e74c3c/white?text=SP001", ghi_chu: "In offset 4 màu." },{ masp: "SP002 - Túi Giấy Kraft", dvt: "Cái", sl_dat: 2000, don_gia: 633.24, thanh_tien: 1266480, hinh_anh: "", ghi_chu: "Không quai." },] });
             const waitForImages = () => Promise.all(Array.from(document.querySelectorAll('.product-image img')).filter(img => !img.complete).map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })));
             window.printDocument = async () => { printBtn.disabled = true; await waitForImages(); window.print(); printBtn.disabled = false; };
-            const initializeApp = () => { showLoading(); try { const urlParams = new URLSearchParams(window.location.search); const jsonData = urlParams.get('data'); let orderData; if (jsonData) { orderData = JSON.parse(decodeURIComponent(jsonData)); } else { document.getElementById('demoWatermark').style.display = 'block'; orderData = generateDemoData(); } const totals = { thanh_tien: orderData.thanh_tien, vat_rate: orderData.vat_rate, }; populateHeader(orderData); populateProducts(orderData.products, totals); printBtn.disabled = false; downloadBtn.disabled = false; } catch (error) { console.error("Lỗi khởi tạo:", error); showError(error.message); } finally { hideLoading(); } };
+            
+            // CẬP NHẬT: Sửa đổi hàm initializeApp
+            const initializeApp = () => {
+                showLoading();
+                try {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const jsonData = urlParams.get('data');
+                    let orderData;
+                    
+                    const container = document.querySelector('.container');
+
+                    if (jsonData) {
+                        // Có dữ liệu thật -> ẩn watermark
+                        orderData = JSON.parse(decodeURIComponent(jsonData));
+                        container.classList.remove('watermark-active'); // Đảm bảo watermark bị tắt
+                    } else {
+                        // Không có dữ liệu -> Chế độ DEMO -> hiện watermark
+                        orderData = generateDemoData();
+                        container.classList.add('watermark-active'); // Kích hoạt watermark
+                    }
+                    
+                    const totals = { thanh_tien: orderData.thanh_tien, vat_rate: orderData.vat_rate };
+                    populateHeader(orderData);
+                    populateProducts(orderData.products, totals);
+                    printBtn.disabled = false;
+                    downloadBtn.disabled = false;
+                } catch (error) {
+                    console.error("Lỗi khởi tạo:", error);
+                    showError(error.message);
+                } finally {
+                    hideLoading();
+                }
+            };
+            
             closeModalBtn.addEventListener('click', hideImageModal);
             imageModal.addEventListener('click', (e) => (e.target === imageModal) && hideImageModal());
             document.body.addEventListener('click', (e) => { if (e.target.tagName === 'IMG' && e.target.dataset.src) showImageModal(e.target.dataset.src); });

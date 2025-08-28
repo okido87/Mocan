@@ -9,18 +9,15 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Times New Roman', Times, serif; background-color: #f0f2f5; padding: 15px; font-size: 13px; }
         
-        /* === SỬA LỖI 1: THAY ĐỔI MÀU CHỮ DYNAMIC VỀ MÀU ĐEN === */
         .dynamic-data { 
-            color: #000000; /* Đổi thành màu đen */
+            color: #000000;
             font-weight: 600; 
         }
-        /* Bỏ các dòng định nghĩa màu riêng lẻ để đảm bảo nhất quán */
-        /* .number.dynamic-data { color: #004080; } */
         
         .container { 
             max-width: 210mm; margin: 0 auto; margin-top: 60px; background: white; 
             position: relative; z-index: 1; box-shadow: 0 0 8px rgba(0,0,0,0.1); 
-            padding: 10mm; /* Padding này chỉ dành cho xem trên web */
+            padding: 10mm;
         }
         #demoWatermark { 
             display: none;
@@ -32,24 +29,56 @@
             display: block;
         }
 
-        .print-controls { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(5px); padding: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); display: flex; gap: 8px; justify-content: center; }
+        .print-controls { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(5px); padding: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; }
         .print-btn, .download-btn { border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold; flex-grow: 1; max-width: 200px; }
+        
+        .toggle-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 15px;
+            background-color: #f0f2f5;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        .toggle-control input {
+            cursor: pointer;
+        }
+
         @media (min-width: 768px) {
             .container { margin-top: 0; }
             .print-controls { top: 20px; right: 20px; left: auto; width: auto; flex-direction: column; gap: 10px; }
             .print-btn, .download-btn { padding: 12px 25px; flex-grow: 0; }
         }
+
         .print-btn { background: #e74c3c; color: white; }
         .download-btn { background: #3498db; color: white; }
         .print-btn:disabled, .download-btn:disabled { background: #bdc3c7; cursor: not-allowed; }
         .header .logo img { max-width: 100%; }
         .title { text-align: center; font-size: 23px; font-weight: bold; margin: 20px 0 5px 0; letter-spacing: 2px; }
         .order-number { text-align: center; font-size: 13px; margin-bottom: 20px; font-weight: bold; }
-        .customer-info, .product-table, .signature-table { width: 100%; border-collapse: collapse; border: 1px solid #000; margin-bottom: 15px; }
-        .customer-info td, .product-table th, .product-table td, .signature-table td { border: 1px solid #000; padding: 6px 8px; vertical-align: middle; }
+        .customer-info, .product-table, .signature-table { width: 100%; border-collapse: collapse; border: 1px solid #000; margin-bottom: 15px; table-layout: fixed; }
+        .customer-info td, .product-table th, .product-table td, .signature-table td { border: 1px solid #000; padding: 6px 8px; vertical-align: middle; word-wrap: break-word; }
         .product-table th { background-color: #f2f2f2; font-weight: bold; }
-        .product-name { text-align: left !important; width: 35%; }
-        .stt-col { text-align: center; }
+        
+        /* === THAY ĐỔI: Điều chỉnh lại kích thước các cột === */
+        .stt-col { width: 5%; text-align: center; }
+        .product-name { width: 30%; text-align: left !important; }
+        .dvt-col { width: 7%; text-align: center; }
+        .sl-col { width: 7%; text-align: center; }
+        .thanh-tien-col { width: 13%; } /* Tăng độ rộng cột Thành tiền */
+        .image-col { width: 18%; text-align: center; } /* Giảm độ rộng cột Hình ảnh */
+        .notes-col { width: 10%; }
+
+        .hide-images .image-col {
+            display: none;
+        }
+
         .product-image { width: 70px; height: 70px; margin: auto; display: flex; align-items: center; justify-content: center; background-color: #f0f2f0; }
         .product-image img { max-width: 100%; max-height: 100%; object-fit: contain; cursor: pointer; }
         .total-row { font-weight: bold; }
@@ -73,10 +102,8 @@
             .product-table thead { display: table-header-group; }
             .product-table tbody tr { page-break-inside: avoid; }
             .customer-info, .bottom-section, .signature-table { page-break-inside: avoid; }
-            
-            /* === SỬA LỖI 1: THAY ĐỔI MÀU CHỮ KHI IN VỀ MÀU ĐEN === */
             .dynamic-data { 
-                color: #000000 !important; /* Đổi thành màu đen khi in */
+                color: #000000 !important;
                 -webkit-print-color-adjust: exact; 
                 print-color-adjust: exact; 
             }
@@ -85,6 +112,9 @@
 </head>
 <body>
     <div class="print-controls">
+        <label class="toggle-control">
+            <input type="checkbox" id="toggleImageColumn" checked> Hiển thị hình ảnh
+        </label>
         <button class="download-btn" onclick="downloadPdf()" id="downloadBtn" disabled>💾 Tải về PDF</button>
         <button class="print-btn" onclick="printDocument()" id="printBtn" disabled>🖨️ In đơn hàng</button>
     </div>
@@ -102,11 +132,11 @@
             <tr><td style="width: 30%;">Người nhận hàng: <strong id="nguoiNhanHang" class="dynamic-data"></strong></td><td style="width: 30%;">Số điện thoại: <strong id="soDienThoai" class="dynamic-data"></strong></td><td>Hình thức giao hàng: <strong id="hanGiaoHang" class="dynamic-data"></strong></td></tr>
         </table>
         <table class="product-table">
-            <thead><tr><th class="stt-col">STT</th><th>Tên sản phẩm</th><th>ĐVT</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th><th>Hình ảnh</th><th>Ghi chú</th></tr></thead>
+            <!-- === THAY ĐỔI: Thêm class cho cột Thành tiền === -->
+            <thead><tr><th class="stt-col">STT</th><th class="product-name">Tên sản phẩm</th><th class="dvt-col">ĐVT</th><th class="sl-col">SL</th><th>Đơn giá</th><th class="thanh-tien-col">Thành tiền</th><th class="image-col">Hình ảnh</th><th class="notes-col">Ghi chú</th></tr></thead>
             <tbody id="productTableBody"></tbody>
         </table>
         
-        <!-- === SỬA LỖI 2: CẬP NHẬT NỘI DUNG GHI CHÚ === -->
         <div class="bottom-section">
              <div class="left-info">
                 <p><strong>Ghi chú đơn hàng:</strong> <span id="ghiChuDonHang" class="dynamic-data" style="font-style: italic;"></span></p>
@@ -129,7 +159,6 @@
     </div>
 
     <script>
-        // Phần JavaScript không cần thay đổi gì, giữ nguyên như cũ.
         document.addEventListener('DOMContentLoaded', function() {
             window.downloadPdf = async () => {
                 const downloadBtn = document.getElementById('downloadBtn');
@@ -161,14 +190,97 @@
             const showError = (message) => { document.getElementById('productTableBody').innerHTML = `<tr><td colspan="8" class="error">❌ Lỗi: ${message}</td></tr>`; hideLoading(); };
             const showImageModal = (src) => { modalImage.src = src; imageModal.style.display = 'block'; };
             const hideImageModal = () => imageModal.style.display = 'none';
-            const populateHeader = (data) => { document.title = data.so_dh || "Đơn Đặt Hàng"; document.getElementById('soPhieu').textContent = data.so_dh || ''; document.getElementById('tenKhachHang').textContent = data.ten_kh || ''; document.getElementById('ngayLap').textContent = formatDate(data.ngay_lap); document.getElementById('diaChiGiao').textContent = data.dia_chi_giao || ''; document.getElementById('nguoiLapDon').textContent = data.nguoi_lap_don || ''; document.getElementById('nguoiNhanHang').textContent = data.nguoi_nhan_hang || ''; document.getElementById('soDienThoai').textContent = data.sdt || ''; document.getElementById('hanGiaoHang').textContent = data.han_giao || ''; document.getElementById('ghiChuDonHang').textContent = data.ghi_chu_dh || ''; document.getElementById('nguoiDuyet').textContent = data.nguoi_duyet || ''; document.getElementById('nguoiLapKy').textContent = data.nguoi_lap_ky || ''; document.getElementById('bankName').textContent = data.bank_name || ''; document.getElementById('bankStk').textContent = data.bank_stk || ''; document.getElementById('bankBranch').textContent = data.bank_branch || ''; 
-                // Xóa dòng này vì giờ nội dung đã là cố định
-                // document.getElementById('dungSai').textContent = data.dung_sai || '±10%'; 
+            const populateHeader = (data) => { document.title = data.so_dh || "Đơn Đặt Hàng"; document.getElementById('soPhieu').textContent = data.so_dh || ''; document.getElementById('tenKhachHang').textContent = data.ten_kh || ''; document.getElementById('ngayLap').textContent = formatDate(data.ngay_lap); document.getElementById('diaChiGiao').textContent = data.dia_chi_giao || ''; document.getElementById('nguoiLapDon').textContent = data.nguoi_lap_don || ''; document.getElementById('nguoiNhanHang').textContent = data.nguoi_nhan_hang || ''; document.getElementById('soDienThoai').textContent = data.sdt || ''; document.getElementById('hanGiaoHang').textContent = data.han_giao || ''; document.getElementById('ghiChuDonHang').textContent = data.ghi_chu_dh || ''; document.getElementById('nguoiDuyet').textContent = data.nguoi_duyet || ''; document.getElementById('nguoiLapKy').textContent = data.nguoi_lap_ky || ''; document.getElementById('bankName').textContent = data.bank_name || ''; document.getElementById('bankStk').textContent = data.bank_stk || ''; document.getElementById('bankBranch').textContent = data.bank_branch || ''; };
+            
+            const populateProducts = (products, totals) => {
+                const tbody = document.getElementById('productTableBody');
+                tbody.innerHTML = '';
+                if (!products || products.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="warning">Không có sản phẩm nào.</td></tr>';
+                    return;
+                }
+                const APP_CONFIG = {
+                    appName: "MocAnSystem-777046908",
+                    imageTableName: "DMSP",
+                    baseUrl: "https://www.appsheet.com/image/getimageurl"
+                };
+                const constructImageUrl = (fileName) => {
+                    if (!fileName || typeof fileName !== 'string') return '';
+                    if (fileName.startsWith('http')) return fileName;
+                    const params = new URLSearchParams({
+                        appName: APP_CONFIG.appName,
+                        tableName: APP_CONFIG.imageTableName,
+                        fileName: fileName
+                    });
+                    return `${APP_CONFIG.baseUrl}?${params.toString()}`;
+                };
+
+                products.forEach((p, index) => {
+                    const imageUrl = constructImageUrl(p.hinh_anh);
+                    // === THAY ĐỔI: Thêm class `thanh-tien-col` vào ô thành tiền của sản phẩm ===
+                    tbody.insertAdjacentHTML('beforeend',
+                       `<tr>
+                            <td class="stt-col">${index + 1}</td>
+                            <td class="product-name dynamic-data">${p.masp || ''}</td>
+                            <td class="dvt-col dynamic-data">${p.dvt || ''}</td>
+                            <td class="sl-col number dynamic-data">${formatNumber(p.sl_dat)}</td>
+                            <td class="number dynamic-data">${formatNumber(p.don_gia)}</td>
+                            <td class="thanh-tien-col number dynamic-data">${formatNumber(p.thanh_tien)}</td>
+                            <td class="image-col">
+                                <div class="product-image">${imageUrl ? `<img src="${imageUrl}" alt="Hình SP" data-src="${imageUrl}" crossorigin="anonymous">` : '<div class="no-image">Không có</div>'}</div>
+                            </td>
+                            <td class="notes-col dynamic-data">${p.ghi_chu || ''}</td>
+                        </tr>`);
+                });
+
+                const subTotal = totals.thanh_tien || 0;
+                const vatRate = totals.vat_rate || 0;
+                const vatAmount = subTotal * vatRate;
+                const grandTotal = subTotal + vatAmount;
+                const vatPercent = vatRate * 100;
+                
+                // === THAY ĐỔI: Thêm class `thanh-tien-col` vào các ô tổng tiền ===
+                tbody.insertAdjacentHTML('beforeend',
+                   `<tr class="total-row">
+                        <td colspan="5" style="text-align:right; padding-right:15px;">Cộng tiền hàng</td>
+                        <td class="thanh-tien-col number dynamic-data">${formatNumber(subTotal)}</td>
+                        <td colspan="2" class="total-colspan"></td>
+                    </tr>
+                    <tr class="total-row">
+                        <td colspan="5" style="text-align:right; padding-right:15px;">VAT (<span class="dynamic-data">${vatPercent}%</span>)</td>
+                        <td class="thanh-tien-col number dynamic-data">${formatNumber(vatAmount)}</td>
+                        <td colspan="2" class="total-colspan"></td>
+                    </tr>
+                    <tr class="total-row">
+                        <td colspan="5" style="text-align:right; padding-right:15px;">TỔNG CỘNG THANH TOÁN</td>
+                        <td class="thanh-tien-col number dynamic-data">${formatNumber(grandTotal)}</td>
+                        <td colspan="2" class="total-colspan"></td>
+                    </tr>
+                    <tr class="word-row">
+                        <td colspan="8" style="text-align: left; font-style: italic; font-weight: bold;">Viết bằng chữ: <span class="dynamic-data">${numberToWords(grandTotal)}</span></td>
+                    </tr>`);
+                
+                updateColspans(); 
             };
-            const populateProducts = (products, totals) => { const tbody = document.getElementById('productTableBody'); tbody.innerHTML = ''; if (!products || products.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="warning">Không có sản phẩm nào.</td></tr>'; return; } const APP_CONFIG = { appName: "MocAnSystem-777046908", imageTableName: "DMSP", baseUrl: "https://www.appsheet.com/image/getimageurl" }; const constructImageUrl = (fileName) => { if (!fileName || typeof fileName !== 'string') return ''; if (fileName.startsWith('http')) { return fileName; } const params = new URLSearchParams({ appName: APP_CONFIG.appName, tableName: APP_CONFIG.imageTableName, fileName: fileName }); return `${APP_CONFIG.baseUrl}?${params.toString()}`; }; products.forEach((p, index) => { const imageUrl = constructImageUrl(p.hinh_anh); tbody.insertAdjacentHTML('beforeend', `<tr><td class="stt-col">${index + 1}</td><td class="product-name dynamic-data">${p.masp || ''}</td><td class="dynamic-data">${p.dvt || ''}</td><td class="number dynamic-data">${formatNumber(p.sl_dat)}</td><td class="number dynamic-data">${formatNumber(p.don_gia)}</td><td class="number dynamic-data">${formatNumber(p.thanh_tien)}</td><td><div class="product-image">${imageUrl ? `<img src="${imageUrl}" alt="Hình SP" data-src="${imageUrl}" crossorigin="anonymous">` : '<div class="no-image">Không có</div>'}</div></td><td class="notes-col dynamic-data">${p.ghi_chu || ''}</td></tr>`); }); const subTotal = totals.thanh_tien || 0; const vatRate = totals.vat_rate || 0; const vatAmount = subTotal * vatRate; const grandTotal = subTotal + vatAmount; const vatPercent = vatRate * 100; tbody.insertAdjacentHTML('beforeend', `<tr class="total-row"><td colspan="5" style="text-align:right; padding-right:15px;">Cộng tiền hàng</td><td class="number dynamic-data">${formatNumber(subTotal)}</td><td colspan="2"></td></tr><tr class="total-row"><td colspan="5" style="text-align:right; padding-right:15px;">VAT (<span class="dynamic-data">${vatPercent}%</span>)</td><td class="number dynamic-data">${formatNumber(vatAmount)}</td><td colspan="2"></td></tr><tr class="total-row"><td colspan="5" style="text-align:right; padding-right:15px;">TỔNG CỘNG THANH TOÁN</td><td class="number dynamic-data">${formatNumber(grandTotal)}</td><td colspan="2"></td></tr><tr><td colspan="8" style="text-align: left; font-style: italic; font-weight: bold;">Viết bằng chữ: <span class="dynamic-data">${numberToWords(grandTotal)}</span></td></tr>`); };
+            
             const generateDemoData = () => ({ so_dh: "DH-DEMO-001", ten_kh: "Công ty TNHH Khách Hàng Mẫu", ngay_lap: new Date().toISOString(), dia_chi_giao: "123 Đường Demo, Phường ABC, Quận XYZ, TP.HCM", nguoi_lap_don: "Nguyễn Văn Mẫu", nguoi_nhan_hang: "Trần Thị B", sdt: "0987654321", han_giao: "Giao hàng tận nơi", ghi_chu_dh: "Đây là ghi chú cho đơn hàng demo.", nguoi_duyet: "Lê Thị Giám Đốc", nguoi_lap_ky: "Nguyễn Văn Mẫu", thanh_tien: 3516480, vat_rate: 0.08, bank_name: "CÔNG TY TNHH QUẢNG CÁO MỘC ẤN", bank_stk: "157938519", bank_branch: "Ngân hàng TMCP Á Châu, CN Phú Lâm", products: [{ masp: "SP001 - Hộp Giấy Carton", dvt: "Cái", sl_dat: 1500, don_gia: 1500, thanh_tien: 2250000, hinh_anh: "https://placehold.co/100x100/e74c3c/white?text=SP001", ghi_chu: "In offset 4 màu." },{ masp: "SP002 - Túi Giấy Kraft", dvt: "Cái", sl_dat: 2000, don_gia: 633.24, thanh_tien: 1266480, hinh_anh: "", ghi_chu: "Không quai." },] });
             const waitForImages = () => Promise.all(Array.from(document.querySelectorAll('.product-image img')).filter(img => !img.complete).map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })));
             window.printDocument = async () => { printBtn.disabled = true; await waitForImages(); window.print(); printBtn.disabled = false; };
+
+            const updateColspans = () => {
+                const isImagesHidden = document.body.classList.contains('hide-images');
+                const totalColspan = isImagesHidden ? 7 : 8;
+                const lastCellsColspan = isImagesHidden ? 1 : 2;
+
+                document.querySelectorAll('.total-colspan').forEach(cell => {
+                    cell.setAttribute('colspan', lastCellsColspan);
+                });
+                const wordRowCell = document.querySelector('.word-row td');
+                if (wordRowCell) {
+                    wordRowCell.setAttribute('colspan', totalColspan);
+                }
+            };
+            
             const initializeApp = () => {
                 showLoading();
                 try {
@@ -195,9 +307,21 @@
                     hideLoading();
                 }
             };
+            
             closeModalBtn.addEventListener('click', hideImageModal);
             imageModal.addEventListener('click', (e) => (e.target === imageModal) && hideImageModal());
             document.body.addEventListener('click', (e) => { if (e.target.tagName === 'IMG' && e.target.dataset.src) showImageModal(e.target.dataset.src); });
+            
+            const toggleImageCheckbox = document.getElementById('toggleImageColumn');
+            toggleImageCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    document.body.classList.remove('hide-images');
+                } else {
+                    document.body.classList.add('hide-images');
+                }
+                updateColspans();
+            });
+
             initializeApp();
         });
     </script>

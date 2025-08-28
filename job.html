@@ -31,9 +31,7 @@
         .print-options .option-item input[type="checkbox"] { margin-right: 5px; width: 16px; height: 16px; cursor: pointer; }
         
         body.hide-final-artwork .full-page-artwork,
-        body.hide-final-artwork .landscape-page {
-            display: none !important;
-        }
+        body.hide-final-artwork .landscape-page { display: none !important; }
 
         .company-header { display: flex; align-items: center; justify-content: space-between; gap: 15px; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px;}
         .footer { padding-top: 10px; margin-top: auto; page-break-before: auto; }
@@ -42,7 +40,6 @@
         .header-title-block { text-align: center; flex-grow: 1; }
         .main-title-line { display: flex; justify-content: center; align-items: baseline; gap: 15px; }
         .main-title { font-size: 2.2em; font-weight: bold; text-transform: uppercase; }
-        .order-number-title { font-size: 1.5em; font-weight: bold; color: #0056b3; }
         .order-info-line { display: flex; justify-content: center; gap: 15px; margin-top: 5px; font-size: 11pt; font-weight: bold; color: #0056b3; }
         #order-qrcode { flex-shrink: 0; width: 56px; height: 56px; }
         .section { border: 1px solid #ccc; padding: 8px; margin-bottom: 8px; border-radius: 4px; page-break-inside: avoid; }
@@ -60,26 +57,11 @@
         .merged-section-layout .text-content { flex: 3; }
         .merged-section-layout .image-content { flex: 1; }
         
-        /* THAY ĐỔI 1: THÊM overflow: hidden VÀO KHUNG CHỨA */
-        #artwork-image-container { 
-            width: 100%; 
-            aspect-ratio: 4 / 3; 
-            border: 1px solid #ccc; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            background-color: #f9f9f9;
-            overflow: hidden; /* <-- Thêm thuộc tính này */
-        }
+        #artwork-image-container { width: 100%; aspect-ratio: 4 / 3; border: 1px solid #ccc; display: flex; justify-content: center; align-items: center; background-color: #f9f9f9; overflow: hidden; cursor: pointer; }
         
-        /* THAY ĐỔI 2: THÊM transform VÀ transform-origin VÀO ẢNH */
-        #artwork-image-container img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            transform: scale(1.2); /* <-- Phóng to 20% */
-            transform-origin: center bottom; /* <-- Neo vào cạnh dưới, chính giữa */
-        }
+        /* THAY ĐỔI 1: Tăng scale lên 1.25 (tăng thêm 5% so với 1.2) */
+        #artwork-image-container img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.25); transform-origin: center bottom; transition: transform 0.2s ease-in-out; }
+        #artwork-image-container:hover img { transform: scale(1.3); } /* Hiệu ứng hover nhỏ */
         
         .signature-box { width: 40%; }
         .signature-box .signature-title { font-weight: bold; }
@@ -87,31 +69,31 @@
         .spinner-small { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid #fff; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; }
         .full-page-artwork { page-break-before: always; width: 100%; padding-top: 10mm; text-align: center; }
         .full-page-artwork img { max-width: 100%; max-height: 250mm; height: auto; object-fit: contain; }
-        .info-item span, .spec-table td, .order-info-line span span, .order-number-title span { color: #0056b3; }
+        .info-item span, .spec-table td, .order-info-line span span { color: #0056b3; }
         .spec-table tr td:first-child, .order-info-line span { color: #000; }
         .spec-table tfoot td { color: #000; font-weight: bold; }
         .spec-table tfoot td.center { color: #0056b3; }
         body.pdf-export-mode .bill-container { display: block; }
         .landscape-page { display: none; }
 
+        /* THAY ĐỔI 2: Thêm CSS cho Lightbox */
+        .lightbox-overlay { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); justify-content: center; align-items: center; animation: fadeIn 0.3s; }
+        .lightbox-content { max-width: 90%; max-height: 90%; object-fit: contain; }
+        .lightbox-close { position: absolute; top: 15px; right: 35px; color: #fff; font-size: 40px; font-weight: bold; transition: 0.3s; cursor: pointer; }
+        .lightbox-close:hover, .lightbox-close:focus { color: #bbb; text-decoration: none; }
+        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+        /* ---- Hết phần CSS Lightbox ---- */
+
         @media print { 
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white !important; margin: 0 !important; padding: 0 !important; overflow: visible; } 
-            .no-print, #loading-overlay, .demo-watermark { display: none !important; } 
+            .no-print, #loading-overlay, .demo-watermark, .lightbox-overlay { display: none !important; } 
             .bill-container { margin: 0 !important; padding: 0 !important; box-shadow: none !important; width: 100% !important; max-width: 100% !important; border: none !important; } 
             @page { size: A4 portrait; margin: 8mm; } 
             .company-header { position: fixed; top: 0; left: auto; right: auto; width: 190mm; background-color: white; z-index: 100; }
             .invoice-body { padding-top: 85px; }
             
             @page landscape { size: A4 landscape; margin: 10mm; }
-            .landscape-page {
-                page: landscape;
-                page-break-before: always;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                width: 100%;
-                height: 180mm;
-            }
+            .landscape-page { page: landscape; page-break-before: always; display: flex; justify-content: center; align-items: center; width: 100%; height: 180mm; }
             .landscape-page img { max-width: 100%; max-height: 100%; object-fit: contain; }
         }
     </style>
@@ -156,15 +138,63 @@
         <div class="footer"><div class="signature-section"><div class="signature-box"><div class="signature-title">Người Lập Phiếu</div><div class="signature-name" id="nguoi_lap_phieu"></div></div><div class="signature-box"><div class="signature-title">Người Duyệt</div><div class="signature-name" id="nguoi_duyet"></div></div></div></div>
     </div>
     
+    <!-- THAY ĐỔI 3: Thêm HTML cho Lightbox -->
+    <div id="lightbox-overlay" class="lightbox-overlay no-print">
+        <span class="lightbox-close">&times;</span>
+        <img id="lightbox-image" class="lightbox-content">
+    </div>
+    <!-- ---- Hết phần HTML Lightbox ---- -->
+
     <script>
         async function convertImageToBase64(imgElement) { if (!imgElement || !imgElement.src || imgElement.src.startsWith('data:image')) return; const originalSrc = imgElement.src; try { const response = await fetch(originalSrc, { cache: 'force-cache' }); if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`); const blob = await response.blob(); return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onloadend = () => { imgElement.src = reader.result; resolve(true); }; reader.onerror = reject; reader.readAsDataURL(blob); }); } catch (error) { console.error(`Failed to fetch or convert image: ${originalSrc}`, error); return false; } }
         async function downloadPDF() { const pdfBtn = document.getElementById('btn-pdf'); const originalBtnContent = pdfBtn.innerHTML; pdfBtn.disabled = true; pdfBtn.innerHTML = '<div class="spinner-small"></div><span>Đang tạo...</span>'; document.body.classList.add('pdf-export-mode'); const element = document.querySelector('.bill-container'); const orderId = document.getElementById('lenh_sx').textContent || 'unknown'; const filename = `LSX-${orderId}.pdf`; const allImages = Array.from(document.querySelectorAll('#logo-img, #artwork-image-container img, .full-page-artwork img, .landscape-page img')); await Promise.all(allImages.map(img => convertImageToBase64(img))); const opt = { margin: [8, 6, 8, 6], filename: filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 3, useCORS: true, logging: false }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }; try { await html2pdf().from(element).set(opt).save(); } catch (error) { console.error("Error creating PDF:", error); } finally { pdfBtn.disabled = false; pdfBtn.innerHTML = originalBtnContent; document.body.classList.remove('pdf-export-mode'); } }
         function getUrlParameter(name) { return decodeURIComponent((new URLSearchParams(window.location.search).get(name) || '').replace(/\+/g, ' ')); }
-        function displayImage(container, imageUrl, altText = 'Image') { if (!container) return; if (imageUrl) { const img = new Image(); img.crossOrigin = 'anonymous'; img.src = imageUrl; img.alt = altText; container.innerHTML = ''; container.appendChild(img); } else { container.innerHTML = '<i>Không có hình ảnh</i>'; } }
         const formatNumber = (value) => { if (!value || isNaN(Number(value))) return value; return Number(value).toLocaleString('vi-VN'); };
         
-        function generateQRCode(elementId, text) { const element = document.getElementById(elementId); if(element) { element.innerHTML = ''; new QRCode(element, { text: text, width: 56, height: 56, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H }); } }
+        // THAY ĐỔI 4: Chỉnh sửa hàm displayImage để tạo hyperlink và gọi lightbox
+        function displayImage(container, imageUrl, altText = 'Image') {
+            if (!container) return;
+            if (imageUrl) {
+                const link = document.createElement('a');
+                link.href = imageUrl;
+                link.target = '_blank'; // Fallback nếu JS bị lỗi
+                link.onclick = (event) => {
+                    event.preventDefault(); // Ngăn chuyển trang
+                    openLightbox(imageUrl);
+                };
 
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.src = imageUrl;
+                img.alt = altText;
+                
+                link.appendChild(img);
+                container.innerHTML = ''; // Xóa nội dung cũ
+                container.appendChild(link);
+            } else {
+                container.innerHTML = '<i>Không có hình ảnh</i>';
+            }
+        }
+
+        // THAY ĐỔI 5: Thêm các hàm để điều khiển lightbox
+        function openLightbox(imageUrl) {
+            const overlay = document.getElementById('lightbox-overlay');
+            const image = document.getElementById('lightbox-image');
+            if (overlay && image) {
+                image.src = imageUrl;
+                overlay.style.display = 'flex';
+            }
+        }
+
+        function closeLightbox() {
+            const overlay = document.getElementById('lightbox-overlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+        }
+        // ---- Hết phần hàm Lightbox ----
+
+        function generateQRCode(elementId, text) { const element = document.getElementById(elementId); if(element) { element.innerHTML = ''; new QRCode(element, { text: text, width: 56, height: 56, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H }); } }
         function renderProductsTable(productsJSON) { const tableBody = document.getElementById('product-table-body'); const tableFooter = document.getElementById('product-summary-footer'); tableBody.innerHTML = ''; tableFooter.innerHTML = ''; if (!productsJSON) { tableBody.innerHTML = `<tr><td colspan="7" class="center"><em>Không có thông tin sản phẩm.</em></td></tr>`; return; } try { const products = JSON.parse(productsJSON); if (Array.isArray(products) && products.length > 0) { let totalDat = 0, totalTP = 0, totalGiao = 0; products.forEach((p, index) => { const row = document.createElement('tr'); row.innerHTML = `<td class="center">${index + 1}</td><td>${p.masp || ''}</td><td class="center">${p.dvt || ''}</td><td class="center text-bold">${formatNumber(p.sl_dat) || ''}</td><td class="center text-bold">${formatNumber(p.sl_tp) || ''}</td><td class="center text-bold">${formatNumber(p.sl_giao) || ''}</td><td>${p.ghi_chu || ''}</td>`; tableBody.appendChild(row); totalDat += parseFloat(p.sl_dat) || 0; totalTP += parseFloat(p.sl_tp) || 0; totalGiao += parseFloat(p.sl_giao) || 0; }); tableFooter.innerHTML = `<tr><td colspan="3" style="text-align:right; font-weight:bold;">TỔNG CỘNG:</td><td class="center text-bold">${formatNumber(totalDat)}</td><td class="center text-bold">${formatNumber(totalTP)}</td><td class="center text-bold">${formatNumber(totalGiao)}</td><td></td></tr>`; } else { throw new Error("JSON is not a non-empty array."); } } catch (error) { console.error("Error parsing products JSON:", error, "Received JSON:", productsJSON); tableBody.innerHTML = `<tr><td colspan="7" class="center"><em>Lỗi đọc dữ liệu sản phẩm.</em></td></tr>`; } }
         function renderPlanTable(planJSON) { const tableBody = document.getElementById('plan-table-body'); tableBody.innerHTML = ''; if (!planJSON) { tableBody.innerHTML = `<tr><td colspan="8" class="center"><em>Chưa có kế hoạch sản xuất.</em></td></tr>`; return; } try { const plans = JSON.parse(planJSON); if (Array.isArray(plans) && plans.length > 0) { plans.forEach((p, index) => { const row = document.createElement('tr'); const slDatValue = parseFloat(p.sl_dat) || 0; const ngaySXDisplay = (slDatValue > 0 && p.han_hoan_thanh) ? new Date(p.han_hoan_thanh).toLocaleDateString('vi-VN') : ''; row.innerHTML = `<td class="center">${index + 1}</td><td>${p.cong_doan || ''}</td><td class="center">${formatNumber(p.sl_yeu_cau) || ''}</td><td class="center">${slDatValue > 0 ? formatNumber(p.sl_dat) : ''}</td><td class="center">${parseFloat(p.sl_hu) ? formatNumber(p.sl_hu) : ''}</td><td class="center">${ngaySXDisplay}</td><td>${p.nguoi_thuc_hien || ''}</td><td>${p.ghi_chu || ''}</td>`; tableBody.appendChild(row); }); } else { throw new Error("JSON is not a non-empty array."); } } catch (error) { console.error("Error parsing plan JSON:", error, "Received JSON:", planJSON); tableBody.innerHTML = `<tr><td colspan="8" class="center"><em>Lỗi đọc dữ liệu kế hoạch.</em></td></tr>`; } }
         function setTextOrHide(elementId, value, parentSelector = '.info-item') { const element = document.getElementById(elementId); const parent = document.getElementById(`parent_${elementId}`) || element.closest(parentSelector); if (value && String(value).trim() !== '' && String(value).trim() !== '0') { if(element) element.textContent = formatNumber(value); if(parent) parent.classList.remove('hidden-item'); } else { if(parent) parent.classList.add('hidden-item'); } }
@@ -185,11 +215,21 @@
             
             const toggleCheckbox = document.getElementById('toggleArtworkPrint');
             if (toggleCheckbox) {
-                const updatePrintClass = () => {
-                    document.body.classList.toggle('hide-final-artwork', !toggleCheckbox.checked);
-                };
+                const updatePrintClass = () => { document.body.classList.toggle('hide-final-artwork', !toggleCheckbox.checked); };
                 updatePrintClass();
                 toggleCheckbox.addEventListener('change', updatePrintClass);
+            }
+
+            // THAY ĐỔI 6: Thêm event listener để đóng lightbox
+            const lightboxOverlay = document.getElementById('lightbox-overlay');
+            const lightboxClose = document.querySelector('.lightbox-close');
+            if(lightboxOverlay && lightboxClose) {
+                lightboxClose.addEventListener('click', closeLightbox);
+                lightboxOverlay.addEventListener('click', function(event) {
+                    if (event.target === this) { // Chỉ đóng khi click vào nền
+                        closeLightbox();
+                    }
+                });
             }
         });
     </script>

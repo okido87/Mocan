@@ -34,7 +34,7 @@
         body.hide-final-artwork .landscape-page { display: none !important; }
 
         .company-header { display: flex; align-items: center; justify-content: space-between; gap: 15px; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px;}
-        .footer { padding-top: 1px; margin-top: auto; page-break-before: auto; }
+        .footer { padding-top: 10px; margin-top: auto; page-break-before: auto; }
         .signature-section { display: flex; justify-content: space-around; text-align: center; page-break-inside: avoid; margin-top: 0; }
         .logo { max-width: 100px; height: auto; flex-shrink: 0; } 
         .header-title-block { text-align: center; flex-grow: 1; }
@@ -126,7 +126,29 @@
         <div class="invoice-body">
             <div class="section"><div class="section-title">A. THÔNG TIN ĐƠN HÀNG</div><div class="merged-section-layout"><div class="text-content"><div class="grid-container grid-2-col"><div class="info-item full-width"><label>Khách hàng:</label><span id="khach_hang"></span></div><div class="info-item"><label>Hạn giao hàng:</label><span id="han_giao_hang"></span></div><div class="info-item"><label>Tổng SL:</label><span id="sl_tong" class="text-bold"></span></div><div class="info-item full-width"><label>Quy trình sản xuất:</label><span id="quy_trinh_san_xuat"></span></div><div class="info-item full-width" id="parent_ghi_chu_binh_bai"><label>Ghi chú bình bài:</label><span id="ghi_chu_binh_bai"></span></div></div></div><div class="image-content"><div id="artwork-image-container"></div></div></div></div>
             <div class="section"><div class="section-title">B. CHI TIẾT VẬT TƯ & IN ẤN</div><table class="spec-table"><thead><tr><th>Hạng mục</th><th>Loại / Mã VT</th><th>Khổ mua (cm)</th><th>SL Cần (Tờ)</th><th>Khổ in</th><th>Kiểu / Màu in</th><th>Ghi chú</th></tr></thead><tbody><tr id="parent_loai_giay_bia"><td class="text-bold">Giấy Bìa</td><td><span id="loai_giay_bia"></span> / <span id="ma_giay_bia"></span></td><td class="center"><span id="kho_giay_bia_mua"></span></td><td class="center text-bold"><span id="sl_giay_bia_can_to"></span></td><td class="center"><span id="kho_in_bia"></span></td><td class="center"><span id="kieu_in_bia"></span> / <span id="so_mau_in_bia"></span></td><td><span id="ghi_chu_giay_bia"></span></td></tr><tr id="parent_loai_giay_ruot"><td class="text-bold">Giấy Ruột</td><td><span id="loai_giay_ruot"></span> / <span id="ma_giay_ruot"></span></td><td class="center"><span id="kho_giay_ruot_mua"></span></td><td class="center text-bold"><span id="sl_giay_ruot_can_to"></span></td><td class="center"><span id="kho_in_ruot"></span></td><td class="center"><span id="kieu_in_ruot"></span> / <span id="so_mau_in_ruot"></span></td><td><span id="ghi_chu_giay_ruot"></span></td></tr><tr id="parent_loai_giay_boi"><td class="text-bold">Giấy Bồi</td><td><span id="loai_giay_boi"></span> / <span id="ma_giay_boi"></span></td><td class="center"><span id="kho_giay_boi_mua_dxr_cm"></span></td><td class="center text-bold"><span id="sl_giay_boi_can_to"></span></td><td class="center">-</td><td class="center">-</td><td><span id="ghi_chu_giay_boi"></span></td></tr><tr id="parent_kho_kem"><td class="text-bold">Kẽm</td><td colspan="3" class="center"><span id="kho_kem"></span></td><td colspan="3"><span id="ghi_chu_kem"></span></td></tr></tbody></table></div>
-            <div class="section"><div class="section-title">C. THÀNH PHẨM</div><div class="grid-container grid-3-col"><div class="info-item" id="parent_ma_mang"><label>Cán màng:</label><span><span id="ma_mang"></span> / <span id="kho_mang"></span>cm / <span id="sl_mang_m"></span>m</span></div><div class="info-item" id="parent_dien_tich_ep_kim"><label>Ép kim:</label><span>DT: <span id="dien_tich_ep_kim"></span>cm², Mã nhũ: <span id="ma_nhu"></span></span></div><div class="info-item" id="parent_trang_phu"><label>Tráng phủ:</label><span id="trang_phu"></span></div><div class="info-item" id="parent_chiet_quang"><label>Chiết quang:</label><span id="chiet_quang"></span></div><div class="info-item" id="parent_boi"><label>Bồi:</label><span id="boi"></span></div><div class="info-item" id="parent_be_noi"><label>Bế nổi:</label><span id="be_noi"></span></div><div class="info-item" id="parent_kieu_be"><label>Kiểu bế:</label><span id="kieu_be"></span></div><div class="info-item" id="parent_so_khuon_be"><label>Khuôn bế:</label><span><span id="so_khuon_be"></span> khuôn (<span id="khuon_be"></span>)</span></div><div class="info-item" id="parent_ghi_chu_be"><label>Ghi chú bế:</label><span id="ghi_chu_be"></span></div><div class="info-item" id="parent_xe"><label>Xé:</label><span id="xe"></span></div><div class="info-item" id="parent_dan"><label>Dán:</label><span id="dan"></span></div><div class="info-item" id="parent_cat_thanh_pham"><label>Cắt TP:</label><span id="cat_thanh_pham"></span></div></div><div class="info-item full-width" style="margin-top: 5px;" id="parent_thanh_pham_khac"><label>TP Khác:</label><span id="thanh_pham_khac"></span></div><div class="info-item full-width" id="parent_ghi_chu_thanh_pham"><label>Ghi chú TP:</label><span id="ghi_chu_thanh_pham"></span></div></div>
+            
+            <!-- === THAY ĐỔI TẠI ĐÂY === -->
+            <div class="section">
+                <div class="section-title">C. IN ẤN - GIA CÔNG - THÀNH PHẨM</div>
+                <div class="grid-container grid-2-col">
+                    <div class="info-item" id="parent_ma_mang"><label>Cán màng:</label><span><span id="ma_mang"></span> / <span id="kho_mang"></span>cm / <span id="sl_mang_m"></span>m</span></div>
+                    <div class="info-item" id="parent_dien_tich_ep_kim"><label>Ép kim:</label><span>DT: <span id="dien_tich_ep_kim"></span>cm², Mã nhũ: <span id="ma_nhu"></span></span></div>
+                    <div class="info-item" id="parent_trang_phu"><label>Tráng phủ:</label><span id="trang_phu"></span></div>
+                    <div class="info-item" id="parent_chiet_quang"><label>Chiết quang:</label><span id="chiet_quang"></span></div>
+                    <div class="info-item" id="parent_boi"><label>Bồi:</label><span id="boi"></span></div>
+                    <div class="info-item" id="parent_be_noi"><label>Bế nổi:</label><span id="be_noi"></span></div>
+                    <div class="info-item" id="parent_kieu_be"><label>Kiểu bế:</label><span id="kieu_be"></span></div>
+                    <div class="info-item" id="parent_so_khuon_be"><label>Khuôn bế:</label><span><span id="so_khuon_be"></span> khuôn (<span id="khuon_be"></span>)</span></div>
+                    <div class="info-item" id="parent_ghi_chu_be"><label>Ghi chú bế:</label><span id="ghi_chu_be"></span></div>
+                    <div class="info-item" id="parent_xe"><label>Xé:</label><span id="xe"></span></div>
+                    <div class="info-item" id="parent_dan"><label>Dán:</label><span id="dan"></span></div>
+                    <div class="info-item" id="parent_cat_thanh_pham"><label>Cắt TP:</label><span id="cat_thanh_pham"></span></div>
+                </div>
+                <div class="info-item full-width" style="margin-top: 5px;" id="parent_thanh_pham_khac"><label>TP Khác:</label><span id="thanh_pham_khac"></span></div>
+                <div class="info-item full-width" id="parent_ghi_chu_thanh_pham"><label>Ghi chú TP:</label><span id="ghi_chu_thanh_pham"></span></div>
+            </div>
+            <!-- === KẾT THÚC THAY ĐỔI === -->
+
             <div class="section"><div class="section-title">D. KẾ HOẠCH SẢN XUẤT</div><table class="spec-table"><thead><tr><th style="width:5%">STT</th><th>Công Đoạn / Mô tả</th><th style="width:10%">SL YC</th><th style="width:10%">SL Đạt</th><th style="width:10%">SL Hư</th><th style="width:12%">Ngày SX</th><th style="width:15%">NV sản xuất</th><th>Ghi Chú</th></tr></thead><tbody id="plan-table-body"></tbody></table></div>
             <div class="section"><div class="section-title">E. CHI TIẾT SẢN PHẨM VÀ GIAO HÀNG</div><table class="spec-table"><thead><tr><th style="width:5%">STT</th><th>Sản phẩm</th><th style="width:8%">ĐVT</th><th style="width:10%">SL Đặt</th><th style="width:10%">SL TP</th><th style="width:10%">SL Giao</th><th style="width:20%">Ghi Chú</th></tr></thead><tbody id="product-table-body"></tbody><tfoot id="product-summary-footer"></tfoot></table><div class="info-item full-width" style="margin-top: 8px;" id="parent_ghi_chu_giao_hang"><label>Ghi chú Giao Hàng:</label><span id="ghi_chu_giao_hang"></span></div><div class="info-item full-width" id="parent_ghi_chu"><label>Ghi chú Chung:</label><span id="ghi_chu"></span></div></div>
         </div>
@@ -207,18 +229,16 @@
         function setTextOrHide(elementId, value, parentSelector = '.info-item') { const element = document.getElementById(elementId); const parent = document.getElementById(`parent_${elementId}`) || element.closest(parentSelector); if (value && String(value).trim() !== '' && String(value).trim() !== '0') { if(element) element.textContent = formatNumber(value); if(parent) parent.classList.remove('hidden-item'); } else { if(parent) parent.classList.add('hidden-item'); } }
         
         function populateProductionOrder(data) {
-            // === THAY ĐỔI: Thêm base URL và hàm helper để xử lý URL hình ảnh ===
             const imageBaseUrl = "https://www.appsheet.com/image/getimageurl?appName=MocAnSystem-777046908&tableName=LSX&fileName=";
             const getFullImageUrl = (fileNameOrUrl) => {
                 if (!fileNameOrUrl) return null;
-                if (fileNameOrUrl.startsWith('http')) {
-                    return fileNameOrUrl;
-                }
+                if (fileNameOrUrl.startsWith('http')) { return fileNameOrUrl; }
                 return imageBaseUrl + fileNameOrUrl;
             };
 
             document.title = `Lệnh Sản Xuất - ${data.lenh_sx || 'Demo'}`;
             const setText = (id, value, isNumeric = false) => { const el = document.getElementById(id); if (el) el.textContent = isNumeric ? formatNumber(value) : (value || ''); };
+            
             setText('lenh_sx', data.lenh_sx);
             if (data.ngay_tao_lenh) { setText('ngay_tao_lenh', new Date(data.ngay_tao_lenh).toLocaleDateString('vi-VN')); }
             setText('loai_don', data.loai_don); setText('khach_hang', data.ten_khach_hang); setText('sl_tong', data.sl_tong, true); setText('nguoi_lap_phieu', data.nguoi_lap_phieu); setText('nguoi_duyet', data.nguoi_duyet);

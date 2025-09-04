@@ -92,10 +92,24 @@
             @page landscape { size: A4 landscape; margin: 10mm; }
             .landscape-page { page: landscape; page-break-before: always; display: flex; justify-content: center; align-items: center; width: 100%; height: 180mm; }
             .landscape-page img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+            /* --- SỬA LỖI TÁCH DÒNG KHI IN --- */
+            /* Đảm bảo thead (tiêu đề bảng) được lặp lại chính xác trên mỗi trang */
+            .spec-table thead {
+                display: table-header-group;
+            }
+            
+            /* Ngăn không cho các dòng trong tbody (thân bảng) và tfoot (chân bảng) bị cắt ngang trang */
+            .spec-table tbody tr,
+            .spec-table tfoot tr {
+                page-break-inside: avoid;
+            }
+            /* --- KẾT THÚC SỬA LỖI --- */
         }
     </style>
 </head>
 <body class="format-a4">
+    <!-- Nội dung phần body giữ nguyên -->
     <div id="loading-overlay"><div class="spinner"></div></div>
     
     <div class="print-options no-print">
@@ -127,7 +141,6 @@
             <div class="section"><div class="section-title">A. THÔNG TIN ĐƠN HÀNG</div><div class="merged-section-layout"><div class="text-content"><div class="grid-container grid-2-col"><div class="info-item full-width"><label>Khách hàng:</label><span id="khach_hang"></span></div><div class="info-item"><label>Hạn giao hàng:</label><span id="han_giao_hang"></span></div><div class="info-item"><label>Tổng SL:</label><span id="sl_tong" class="text-bold"></span></div><div class="info-item full-width"><label>Quy trình sản xuất:</label><span id="quy_trinh_san_xuat"></span></div><div class="info-item full-width" id="parent_ghi_chu_binh_bai"><label>Ghi chú bình bài:</label><span id="ghi_chu_binh_bai"></span></div></div></div><div class="image-content"><div id="artwork-image-container"></div></div></div></div>
             <div class="section"><div class="section-title">B. CHI TIẾT VẬT TƯ & IN ẤN</div><table class="spec-table"><thead><tr><th>Hạng mục</th><th>Loại / Mã VT</th><th>Khổ mua (cm)</th><th>SL Cần (Tờ)</th><th>Khổ in</th><th>Kiểu / Màu in</th><th>Ghi chú</th></tr></thead><tbody><tr id="parent_loai_giay_bia"><td class="text-bold">Giấy Bìa</td><td><span id="loai_giay_bia"></span> / <span id="ma_giay_bia"></span></td><td class="center"><span id="kho_giay_bia_mua"></span></td><td class="center text-bold"><span id="sl_giay_bia_can_to"></span></td><td class="center"><span id="kho_in_bia"></span></td><td class="center"><span id="kieu_in_bia"></span> / <span id="so_mau_in_bia"></span></td><td><span id="ghi_chu_giay_bia"></span></td></tr><tr id="parent_loai_giay_ruot"><td class="text-bold">Giấy Ruột</td><td><span id="loai_giay_ruot"></span> / <span id="ma_giay_ruot"></span></td><td class="center"><span id="kho_giay_ruot_mua"></span></td><td class="center text-bold"><span id="sl_giay_ruot_can_to"></span></td><td class="center"><span id="kho_in_ruot"></span></td><td class="center"><span id="kieu_in_ruot"></span> / <span id="so_mau_in_ruot"></span></td><td><span id="ghi_chu_giay_ruot"></span></td></tr><tr id="parent_loai_giay_boi"><td class="text-bold">Giấy Bồi</td><td><span id="loai_giay_boi"></span> / <span id="ma_giay_boi"></span></td><td class="center"><span id="kho_giay_boi_mua_dxr_cm"></span></td><td class="center text-bold"><span id="sl_giay_boi_can_to"></span></td><td class="center">-</td><td class="center">-</td><td><span id="ghi_chu_giay_boi"></span></td></tr><tr id="parent_kho_kem"><td class="text-bold">Kẽm</td><td colspan="3" class="center"><span id="kho_kem"></span></td><td colspan="3"><span id="ghi_chu_kem"></span></td></tr></tbody></table></div>
             
-            <!-- === THAY ĐỔI TẠI ĐÂY === -->
             <div class="section">
                 <div class="section-title">C. IN ẤN - GIA CÔNG - THÀNH PHẨM</div>
                 <div class="grid-container grid-2-col">
@@ -147,7 +160,6 @@
                 <div class="info-item full-width" style="margin-top: 5px;" id="parent_thanh_pham_khac"><label>TP Khác:</label><span id="thanh_pham_khac"></span></div>
                 <div class="info-item full-width" id="parent_ghi_chu_thanh_pham"><label>Ghi chú TP:</label><span id="ghi_chu_thanh_pham"></span></div>
             </div>
-            <!-- === KẾT THÚC THAY ĐỔI === -->
 
             <div class="section"><div class="section-title">D. KẾ HOẠCH SẢN XUẤT</div><table class="spec-table"><thead><tr><th style="width:5%">STT</th><th>Công Đoạn / Mô tả</th><th style="width:10%">SL YC</th><th style="width:10%">SL Đạt</th><th style="width:10%">SL Hư</th><th style="width:12%">Ngày SX</th><th style="width:15%">NV sản xuất</th><th>Ghi Chú</th></tr></thead><tbody id="plan-table-body"></tbody></table></div>
             <div class="section"><div class="section-title">E. CHI TIẾT SẢN PHẨM VÀ GIAO HÀNG</div><table class="spec-table"><thead><tr><th style="width:5%">STT</th><th>Sản phẩm</th><th style="width:8%">ĐVT</th><th style="width:10%">SL Đặt</th><th style="width:10%">SL TP</th><th style="width:10%">SL Giao</th><th style="width:20%">Ghi Chú</th></tr></thead><tbody id="product-table-body"></tbody><tfoot id="product-summary-footer"></tfoot></table><div class="info-item full-width" style="margin-top: 8px;" id="parent_ghi_chu_giao_hang"><label>Ghi chú Giao Hàng:</label><span id="ghi_chu_giao_hang"></span></div><div class="info-item full-width" id="parent_ghi_chu"><label>Ghi chú Chung:</label><span id="ghi_chu"></span></div></div>
@@ -163,6 +175,7 @@
     </div>
 
     <script>
+        // Toàn bộ phần script của bạn giữ nguyên
         async function convertImageToBase64(imgElement) { if (!imgElement || !imgElement.src || imgElement.src.startsWith('data:image')) return; const originalSrc = imgElement.src; try { const response = await fetch(originalSrc, { cache: 'force-cache' }); if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`); const blob = await response.blob(); return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onloadend = () => { imgElement.src = reader.result; resolve(true); }; reader.onerror = reject; reader.readAsDataURL(blob); }); } catch (error) { console.error(`Failed to fetch or convert image: ${originalSrc}`, error); return false; } }
         async function downloadPDF() { const pdfBtn = document.getElementById('btn-pdf'); const originalBtnContent = pdfBtn.innerHTML; pdfBtn.disabled = true; pdfBtn.innerHTML = '<div class="spinner-small"></div><span>Đang tạo...</span>'; document.body.classList.add('pdf-export-mode'); const element = document.querySelector('.bill-container'); const orderId = document.getElementById('lenh_sx').textContent || 'unknown'; const filename = `LSX-${orderId}.pdf`; const allImages = Array.from(document.querySelectorAll('#logo-img, #artwork-image-container img, .full-page-artwork img, .landscape-page img')); await Promise.all(allImages.map(img => convertImageToBase64(img))); const opt = { margin: [8, 6, 8, 6], filename: filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 3, useCORS: true, logging: false }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }; try { await html2pdf().from(element).set(opt).save(); } catch (error) { console.error("Error creating PDF:", error); } finally { pdfBtn.disabled = false; pdfBtn.innerHTML = originalBtnContent; document.body.classList.remove('pdf-export-mode'); } }
         function getUrlParameter(name) { return decodeURIComponent((new URLSearchParams(window.location.search).get(name) || '').replace(/\+/g, ' ')); }

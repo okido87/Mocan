@@ -42,7 +42,11 @@
         .main-title { font-size: 2.2em; font-weight: bold; text-transform: uppercase; }
         .order-info-line { display: flex; justify-content: center; gap: 15px; margin-top: 5px; font-size: 11pt; font-weight: bold; color: #0056b3; }
         #order-qrcode { flex-shrink: 0; width: 56px; height: 56px; }
-        .section { border: 1px solid #ccc; padding: 8px; margin-bottom: 8px; border-radius: 4px; page-break-inside: avoid; }
+        
+        /* --- THAY ĐỔI 1: GỠ BỎ page-break-inside: avoid; KHỎI .section --- */
+        /* Thuộc tính này sẽ được xử lý chính xác hơn ở cấp độ dòng của bảng (tr) khi in */
+        .section { border: 1px solid #ccc; padding: 8px; margin-bottom: 8px; border-radius: 4px; }
+        
         .section-title { font-weight: bold; font-size: 1.2em; background-color: #f2f2f2; padding: 4px 8px; margin: -8px -8px 8px -8px; border-bottom: 1px solid #ccc; border-radius: 4px 4px 0 0; }
         .grid-container { display: grid; gap: 4px 12px; } .grid-2-col { grid-template-columns: repeat(2, 1fr); } .grid-3-col { grid-template-columns: repeat(3, 1fr); }
         .info-item { display: flex; flex-wrap: wrap; align-items: baseline; }
@@ -85,31 +89,51 @@
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white !important; margin: 0 !important; padding: 0 !important; overflow: visible; } 
             .no-print, #loading-overlay, .demo-watermark, .lightbox-overlay { display: none !important; } 
             .bill-container { margin: 0 !important; padding: 0 !important; box-shadow: none !important; width: 100% !important; max-width: 100% !important; border: none !important; } 
-            @page { size: A4 portrait; margin: 8mm; } 
-            .company-header { position: fixed; top: 0; left: auto; right: auto; width: 190mm; background-color: white; z-index: 100; }
-            .invoice-body { padding-top: 85px; }
+            
+            /* --- THAY ĐỔI 2: SỬA LỖI HEADER CHE NỘI DUNG --- */
+            /* Tạo lề trên đủ lớn trên MỌI trang để chứa header */
+            @page { 
+                size: A4 portrait; 
+                margin: 30mm 8mm 15mm 8mm; /* Tăng lề trên lên 30mm */
+            } 
+            
+            /* Đặt header vào vùng lề trên đã tạo */
+            .company-header { 
+                position: fixed; 
+                top: 8mm;      /* Đặt header ở đầu vùng in */
+                left: 8mm;
+                right: 8mm;
+                width: calc(210mm - 16mm); /* Tự động tính toán chiều rộng */
+                background-color: white; 
+                z-index: 100; 
+                margin: 0;
+            }
+
+            /* Bỏ padding-top không cần thiết nữa vì @page đã xử lý */
+            .invoice-body { 
+                padding-top: 0; 
+            }
+            /* --- KẾT THÚC THAY ĐỔI 2 --- */
             
             @page landscape { size: A4 landscape; margin: 10mm; }
             .landscape-page { page: landscape; page-break-before: always; display: flex; justify-content: center; align-items: center; width: 100%; height: 180mm; }
             .landscape-page img { max-width: 100%; max-height: 100%; object-fit: contain; }
-
-            /* --- SỬA LỖI TÁCH DÒNG KHI IN --- */
-            /* Đảm bảo thead (tiêu đề bảng) được lặp lại chính xác trên mỗi trang */
+            
+            /* Đảm bảo thead (tiêu đề bảng) lặp lại chính xác trên mỗi trang */
             .spec-table thead {
                 display: table-header-group;
             }
             
-            /* Ngăn không cho các dòng trong tbody (thân bảng) và tfoot (chân bảng) bị cắt ngang trang */
+            /* Ngăn không cho các dòng trong tbody và tfoot bị cắt ngang trang */
             .spec-table tbody tr,
             .spec-table tfoot tr {
                 page-break-inside: avoid;
             }
-            /* --- KẾT THÚC SỬA LỖI --- */
         }
     </style>
 </head>
 <body class="format-a4">
-    <!-- Nội dung phần body giữ nguyên -->
+    <!-- NỘI DUNG HTML VÀ SCRIPT GIỮ NGUYÊN KHÔNG THAY ĐỔI -->
     <div id="loading-overlay"><div class="spinner"></div></div>
     
     <div class="print-options no-print">
@@ -175,7 +199,6 @@
     </div>
 
     <script>
-        // Toàn bộ phần script của bạn giữ nguyên
         async function convertImageToBase64(imgElement) { if (!imgElement || !imgElement.src || imgElement.src.startsWith('data:image')) return; const originalSrc = imgElement.src; try { const response = await fetch(originalSrc, { cache: 'force-cache' }); if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`); const blob = await response.blob(); return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onloadend = () => { imgElement.src = reader.result; resolve(true); }; reader.onerror = reject; reader.readAsDataURL(blob); }); } catch (error) { console.error(`Failed to fetch or convert image: ${originalSrc}`, error); return false; } }
         async function downloadPDF() { const pdfBtn = document.getElementById('btn-pdf'); const originalBtnContent = pdfBtn.innerHTML; pdfBtn.disabled = true; pdfBtn.innerHTML = '<div class="spinner-small"></div><span>Đang tạo...</span>'; document.body.classList.add('pdf-export-mode'); const element = document.querySelector('.bill-container'); const orderId = document.getElementById('lenh_sx').textContent || 'unknown'; const filename = `LSX-${orderId}.pdf`; const allImages = Array.from(document.querySelectorAll('#logo-img, #artwork-image-container img, .full-page-artwork img, .landscape-page img')); await Promise.all(allImages.map(img => convertImageToBase64(img))); const opt = { margin: [8, 6, 8, 6], filename: filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 3, useCORS: true, logging: false }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }; try { await html2pdf().from(element).set(opt).save(); } catch (error) { console.error("Error creating PDF:", error); } finally { pdfBtn.disabled = false; pdfBtn.innerHTML = originalBtnContent; document.body.classList.remove('pdf-export-mode'); } }
         function getUrlParameter(name) { return decodeURIComponent((new URLSearchParams(window.location.search).get(name) || '').replace(/\+/g, ' ')); }

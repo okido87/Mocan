@@ -86,54 +86,50 @@
             .no-print, #loading-overlay, .demo-watermark, .lightbox-overlay { display: none !important; } 
             .bill-container { margin: 0 !important; padding: 0 !important; box-shadow: none !important; width: 100% !important; max-width: 100% !important; border: none !important; } 
             
+            /* --- KHẮC PHỤC HEADER VÀ PHÂN TRANG (PHIÊN BẢN HOÀN CHỈNH) --- */
+
+            /* 1. Định nghĩa lề trang, tạo khoảng trống cho header */
             @page { 
                 size: A4 portrait; 
-                margin: 8mm; /* Giữ lề tiêu chuẩn */
+                /* Lề trên 30mm, đủ lớn để chứa header */
+                margin: 30mm 8mm 8mm 8mm; 
             } 
 
-            /* --- KHẮC PHỤC VỊ TRÍ HEADER --- */
-            /* Đặt header cố định ở đầu trang in */
+            /* 2. Đặt header cố định vào vùng lề trên của MỌI trang */
             .company-header { 
                 position: fixed; 
-                top: 0; /* Đặt lại top về 0 để khớp với bill-container */
-                left: 0;
-                right: 0;
-                width: 190mm; /* Chiều rộng của vùng nội dung */
+                /* Đặt header cách lề trên giấy 8mm (nằm gọn trong vùng margin-top) */
+                top: 8mm;
+                left: 8mm;
+                right: 8mm;
+                width: calc(210mm - 16mm); /* Chiều rộng vùng in = rộng A4 - 2*lề */
                 background-color: white; 
                 z-index: 100;
-                padding-left: 10pt; /* Giữ padding để nội dung header không bị dính lề */
-                padding-right: 10pt;
-                margin: 0 auto; /* Căn giữa header */
+                margin: 0; /* Ghi đè margin mặc định */
+                padding-top: 10pt; /* Giữ lại padding gốc để giao diện không đổi */
             }
 
-            /* Tạo khoảng trống ở đầu phần thân để nội dung không bị header che */
+            /* 3. Bỏ padding-top không cần thiết của phần thân đi */
             .invoice-body { 
-                padding-top: 85px; /* Giữ lại khoảng trống này, nó sẽ hoạt động đúng trên mọi trang */
+                padding-top: 0; /* Lề trang @page đã xử lý việc tạo khoảng trống */
             }
-            /* --- KẾT THÚC KHẮC PHỤC HEADER --- */
+            
+            /* 4. Đảm bảo các quy tắc cho bảng vẫn chính xác */
+            .spec-table thead {
+                display: table-header-group; /* Giúp lặp lại tiêu đề cột của bảng */
+            }
+            .spec-table tfoot {
+                display: table-row-group; /* Ngăn dòng Tổng cộng bị lặp lại */
+            }
+            .spec-table tbody tr,
+            .spec-table tfoot tr {
+                page-break-inside: avoid; /* Ngăn một dòng bị xé làm đôi */
+            }
+            /* --- KẾT THÚC KHẮC PHỤC --- */
 
             @page landscape { size: A4 landscape; margin: 10mm; }
             .landscape-page { page: landscape; page-break-before: always; display: flex; justify-content: center; align-items: center; width: 100%; height: 180mm; }
             .landscape-page img { max-width: 100%; max-height: 100%; object-fit: contain; }
-            
-            /* --- KHẮC PHỤC PHÂN TRANG BẢNG --- */
-            /* Đảm bảo thead (tiêu đề cột) lặp lại ở đầu mỗi trang mới */
-            .spec-table thead {
-                display: table-header-group;
-            }
-
-            /* --- MỚI: Ngăn tfoot (dòng tổng cộng) lặp lại trên mỗi trang --- */
-            /* Bằng cách thay đổi vai trò của nó thành một nhóm dòng thông thường (như tbody) */
-            .spec-table tfoot {
-                display: table-row-group;
-            }
-            
-            /* Ngăn không cho một dòng (tr) bị cắt làm đôi giữa hai trang */
-            .spec-table tbody tr,
-            .spec-table tfoot tr {
-                page-break-inside: avoid;
-            }
-            /* --- KẾT THÚC KHẮC PHỤC PHÂN TRANG BẢNG --- */
         }
     </style>
 </head>

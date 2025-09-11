@@ -243,7 +243,7 @@
             } 
         }
         
-        // === HÀM ĐÃ SỬA LẠI ĐÚNG YÊU CẦU ===
+        // === HÀM ĐÃ SỬA LỖI SẮP XẾP BẰNG QUY TRÌNH SẢN XUẤT ===
         function renderPlanTable(planJSON) {
             const tableBody = document.getElementById('plan-table-body');
             tableBody.innerHTML = '';
@@ -254,12 +254,40 @@
             try {
                 const plans = JSON.parse(planJSON);
                 if (Array.isArray(plans) && plans.length > 0) {
-                    // Lặp qua mảng theo đúng thứ tự gốc, không cần sắp xếp
+                    
+                    // 1. Lấy chuỗi quy trình sản xuất từ URL và chuyển thành một mảng thứ tự.
+                    const quyTrinhStr = getUrlParameter('quy_trinh_san_xuat');
+                    const processOrder = quyTrinhStr ? quyTrinhStr.split(/\s*,\s*/) : [];
+
+                    // 2. Sắp xếp mảng 'plans' dựa trên vị trí của 'cong_doan' trong mảng 'processOrder'.
+                    if (processOrder.length > 0) {
+                        plans.sort((a, b) => {
+                            const indexA = processOrder.indexOf(a.cong_doan.trim());
+                            const indexB = processOrder.indexOf(b.cong_doan.trim());
+                            
+                            const finalIndexA = indexA === -1 ? 999 : indexA;
+                            const finalIndexB = indexB === -1 ? 999 : indexB;
+
+                            return finalIndexA - finalIndexB;
+                        });
+                    }
+
                     plans.forEach((p, index) => {
                         const row = document.createElement('tr');
                         const slDatValue = parseFloat(p.sl_dat) || 0;
-                        const ngaySXDisplay = (slDatValue > 0 && p.han_hoan_thanh) ? new Date(p.han_hoan_thanh).toLocaleDateString('vi-VN') : '';
-                        // Dùng (index + 1) để tạo STT tự động trên form
+                        let ngaySXDisplay = '';
+                        if (slDatValue > 0 && p.han_hoan_thanh) {
+                            // Xử lý định dạng ngày tháng 'MM/DD/YYYY' từ URL
+                            const parts = p.han_hoan_thanh.split('/');
+                            if (parts.length === 3) {
+                                // new Date(year, monthIndex, day)
+                                ngaySXDisplay = new Date(parts[2], parts[0] - 1, parts[1]).toLocaleDateString('vi-VN');
+                            } else {
+                                // Fallback cho các định dạng khác
+                                ngaySXDisplay = new Date(p.han_hoan_thanh).toLocaleDateString('vi-VN');
+                            }
+                        }
+                        
                         row.innerHTML = `<td class="center">${index + 1}</td><td>${p.cong_doan || ''}</td><td class="center">${formatNumber(p.sl_yeu_cau) || ''}</td><td class="center">${slDatValue > 0 ? formatNumber(p.sl_dat) : ''}</td><td class="center">${parseFloat(p.sl_hu) ? formatNumber(p.sl_hu) : ''}</td><td class="center">${ngaySXDisplay}</td><td>${p.nguoi_thuc_hien || ''}</td><td>${p.ghi_chu || ''}</td>`;
                         tableBody.appendChild(row);
                     });
@@ -279,22 +307,23 @@
             const getFullImageUrl = (fileNameOrUrl) => {
                 if (!fileNameOrUrl) return null;
                 if (fileNameOrUrl.startsWith('http')) { return fileNameOrUrl; }
-                return imageBaseUrl + fileNameOrUrl;
+                return imageBaseUrl + encodeURIComponent(fileNameOrUrl);
             };
 
             document.title = `Lệnh Sản Xuất - ${data.lenh_sx || 'Demo'}`;
             const setText = (id, value, isNumeric = false) => { const el = document.getElementById(id); if (el) el.textContent = isNumeric ? formatNumber(value) : (value || ''); };
             
             setText('lenh_sx', data.lenh_sx);
-            if (data.ngay_tao_lenh) { setText('ngay_tao_lenh', new Date(data.ngay_tao_lenh).toLocaleDateString('vi-VN')); }
+            if (data.ngay_tao_lenh) { setText('ngay_tao_lenh', new Date(data.ngay_tao_lenh.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')).toLocaleDateString('vi-VN')); }
             setText('loai_don', data.loai_don); setText('khach_hang', data.ten_khach_hang); setText('sl_tong', data.sl_tong, true); setText('nguoi_lap_phieu', data.nguoi_lap_phieu); setText('nguoi_duyet', data.nguoi_duyet);
-            if (data.han_giao_hang) { setText('han_giao_hang', new Date(data.han_giao_hang).toLocaleDateString('vi-VN')); }
+            if (data.han_giao_hang) { setText('han_giao_hang', new Date(data.han_giao_hang.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')).toLocaleDateString('vi-VN')); }
+            
             setTextOrHide('quy_trinh_san_xuat', data.quy_trinh_san_xuat); setTextOrHide('ghi_chu_binh_bai', data.ghi_chu_binh_bai); setTextOrHide('loai_giay_bia', data.loai_giay_bia, 'tr'); setTextOrHide('loai_giay_ruot', data.loai_giay_ruot, 'tr'); setTextOrHide('loai_giay_boi', data.loai_giay_boi, 'tr'); setTextOrHide('kho_kem', data.kho_kem, 'tr'); setTextOrHide('ma_mang', data.ma_mang); setTextOrHide('dien_tich_ep_kim', data.dien_tich_ep_kim); setTextOrHide('trang_phu', data.trang_phu); setTextOrHide('chiet_quang', data.chiet_quang); setTextOrHide('boi', data.boi); setTextOrHide('be_noi', data.be_noi); setTextOrHide('kieu_be', data.kieu_be); setTextOrHide('so_khuon_be', data.so_khuon_be); setTextOrHide('ghi_chu_be', data.ghi_chu_be); setTextOrHide('xe', data.xe); setTextOrHide('dan', data.dan); setTextOrHide('cat_thanh_pham', data.cat_thanh_pham); setTextOrHide('thanh_pham_khac', data.thanh_pham_khac); setTextOrHide('ghi_chu_thanh_pham', data.ghi_chu_thanh_pham); setTextOrHide('ghi_chu_giao_hang', data.ghi_chu_giao_hang); setTextOrHide('ghi_chu', data.ghi_chu);
             if (data.loai_giay_bia) { setText('ma_giay_bia', data.ma_giay_bia); setText('kho_giay_bia_mua', data.kho_giay_bia_mua); setText('sl_giay_bia_can_to', data.sl_giay_bia_can_to, true); setText('kho_in_bia', data.kho_in_bia); setText('kieu_in_bia', data.kieu_in_bia); setText('so_mau_in_bia', data.so_mau_in_bia); setText('ghi_chu_giay_bia', data.ghi_chu_giay_bia); }
             if (data.loai_giay_ruot) { setText('ma_giay_ruot', data.ma_giay_ruot); setText('kho_giay_ruot_mua', data.kho_giay_ruot_mua); setText('sl_giay_ruot_can_to', data.sl_giay_ruot_can_to, true); setText('kho_in_ruot', data.kho_in_ruot); setText('kieu_in_ruot', data.kieu_in_ruot); setText('so_mau_in_ruot', data.so_mau_in_ruot); setText('ghi_chu_giay_ruot', data.ghi_chu_giay_ruot); }
             if (data.loai_giay_boi) { setText('ma_giay_boi', data.ma_giay_boi); setText('kho_giay_boi_mua_dxr_cm', data.kho_giay_boi_mua_dxr_cm); setText('sl_giay_boi_can_to', data.sl_giay_boi_can_to, true); setText('ghi_chu_giay_boi', data.ghi_chu_giay_boi); }
             if (data.kho_kem) { setText('ghi_chu_kem', data.ghi_chu_kem); }
-            if (data.ma_mang) { setText('kho_mang', data.kho_mang); setText('sl_mang_m', data.sl_mang_m); }
+            if (data.ma_mang) { setText('kho_mang', data.kho_mang); setText('sl_mang_m', data.sl_mang_m, true); }
             if (data.dien_tich_ep_kim) { setText('ma_nhu', data.ma_nhu); }
             if (data.so_khuon_be) { setText('khuon_be', data.khuon_be); }
             
@@ -302,24 +331,24 @@
             renderPlanTable(data.plan_json); 
             if(data.lenh_sx) { generateQRCode('order-qrcode', data.lenh_sx); }
             
-            const fallbackArtworkUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://boxprintingcompany.com/Technical-Supports/images/Why-need-the-Box-Design.jpg');
-            const finalArtworkUrl = getFullImageUrl(data.hinh_bai_binh_1) || fallbackArtworkUrl;
+            const finalArtworkUrl = getFullImageUrl(data.hinh_bai_binh_1);
             displayImage(document.getElementById('artwork-image-container'), finalArtworkUrl, 'Hình bài bình');
             
             if (data.show_artwork === 'true') { 
-                const mainContainer = document.getElementById('bill-container'); 
+                const mainContainer = document.querySelector('.invoice-body');
+                const footer = document.querySelector('.footer');
                 const artworkUrl1 = getFullImageUrl(data.hinh_bai_binh_1);
                 if (artworkUrl1) { 
                     const artworkPage1 = document.createElement('div'); 
                     artworkPage1.className = 'full-page-artwork'; 
-                    mainContainer.appendChild(artworkPage1); 
+                    mainContainer.insertBefore(artworkPage1, footer);
                     displayImage(artworkPage1, artworkUrl1, 'Hình bài bình 1 khổ lớn'); 
                 } 
                 const artworkUrl2 = getFullImageUrl(data.hinh_bai_binh_2);
                 if (artworkUrl2) { 
                     const artworkPage2 = document.createElement('div'); 
                     artworkPage2.className = 'landscape-page'; 
-                    mainContainer.appendChild(artworkPage2); 
+                    mainContainer.insertBefore(artworkPage2, footer);
                     displayImage(artworkPage2, artworkUrl2, 'Hình bài bình 2 khổ lớn (Mặt sau)'); 
                 } 
             }
@@ -327,9 +356,9 @@
         
         function loadDataFromUrl() { const data = {}; const fields = ['lenh_sx','ngay_tao_lenh','loai_don','ten_khach_hang','quy_trinh_san_xuat','sl_tong','hinh_bai_binh_1', 'hinh_bai_binh_2','ghi_chu_binh_bai','loai_giay_bia','ma_giay_bia','kho_giay_bia_mua','sl_giay_bia_can_to','kho_in_bia','kieu_in_bia','so_mau_in_bia','ghi_chu_giay_bia','loai_giay_ruot','ma_giay_ruot','kho_giay_ruot_mua','sl_giay_ruot_can_to','kho_in_ruot','kieu_in_ruot','so_mau_in_ruot','ghi_chu_giay_ruot','kho_kem','ghi_chu_kem','loai_giay_boi','ma_giay_boi','kho_giay_boi_mua_dxr_cm','sl_giay_boi_can_to','ghi_chu_giay_boi','ma_mang','kho_mang','sl_mang_m','trang_phu','dien_tich_ep_kim','ma_nhu','chiet_quang','boi','kieu_be','so_khuon_be','khuon_be','ghi_chu_be','be_noi','xe','dan','cat_thanh_pham','thanh_pham_khac','ghi_chu_thanh_pham','nguoi_lap_phieu','nguoi_duyet', 'products_json', 'plan_json', 'han_giao_hang', 'show_artwork']; fields.forEach(field => data[field] = getUrlParameter(field)); populateProductionOrder(data); }
         function loadDemoData() { 
-            const demoProducts = [ { "masp": "SP001 - Hộp quà tặng cao cấp", "dvt": "Cái", "sl_dat": "3000", "sl_tp": "2950", "sl_giao": "1500", "ghi_chu": "Màu đỏ cờ, logo ép kim" }, { "masp": "SP002 - Túi giấy đựng sản phẩm", "dvt": "Cái", "sl_dat": "2000", "sl_tp": "2000", "sl_giao": "", "ghi_chu": "Dây dù màu trắng" }, { "masp": "SP003 - Tem nhãn decal", "dvt": "Con", "sl_dat": "5500", "sl_tp": "", "sl_giao": "", "ghi_chu": "Bế tròn, cán màng bóng" } ]; 
-            const demoPlan = [ { "cong_doan": "In Offset Bìa", "sl_yeu_cau": "1300", "sl_dat": "1290", "sl_hu": "10", "han_hoan_thanh": "2024-07-28", "nguoi_thuc_hien": "Tổ In 1", "ghi_chu": "Canh màu theo mẫu duyệt" }, { "cong_doan": "Cán màng", "sl_yeu_cau": "1290", "sl_dat": "1290", "sl_hu": "0", "han_hoan_thanh": "2024-07-29", "nguoi_thuc_hien": "Tổ Thành Phẩm", "ghi_chu": "Dùng màng mờ" }, { "cong_doan": "Bế", "sl_yeu_cau": "1290", "sl_dat": "", "sl_hu": "5", "han_hoan_thanh": "2024-07-30", "nguoi_thuc_hien": "Tổ Thành Phẩm", "ghi_chu": "" } ]; 
-            const demoData = {lenh_sx: 'LSX-DEMO-001', ngay_tao_lenh: '2024-07-25', loai_don: 'Sản xuất mới', ten_khach_hang: 'CÔNG TY TNHH THƯƠNG MẠI DỊCH VỤ SQH', quy_trinh_san_xuat: 'In Offset -> Cán Màng -> Bế -> Dán thành phẩm', sl_tong: '10500', han_giao_hang: '2024-08-15', hinh_bai_binh_1: 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://boxprintingcompany.com/Technical-Supports/images/Why-need-the-Box-Design.jpg'), hinh_bai_binh_2: 'https://via.placeholder.com/1000x800.png?text=Hinh+Bai+Binh+2+-+Mat+Sau', ghi_chu_binh_bai: 'Canh màu theo mẫu duyệt ngày 24/07. Chú ý các chi tiết nhỏ.',loai_giay_bia: 'Ivory', ma_giay_bia: 'IVY-350', kho_giay_bia_mua: '79x109', sl_giay_bia_can_to: '1300',kho_in_bia: '72x102', kieu_in_bia: 'Offset', so_mau_in_bia: '4 màu CMYK', ghi_chu_giay_bia: 'Nhập kho ngày 20/07',loai_giay_ruot: '', ma_giay_ruot: '', kho_giay_ruot_mua: '', sl_giay_ruot_can_to: '',kho_in_ruot: '', kieu_in_ruot: '', so_mau_in_ruot: '', ghi_chu_giay_ruot: '',kho_kem: '1030*770*0.3', ghi_chu_kem: 'Xuất 5 tấm kẽm mới',loai_giay_boi: 'Carton', ma_giay_boi: 'CAR-1200', kho_giay_boi_mua_dxr_cm: '79x109', sl_giay_boi_can_to: '1250',ghi_chu_giay_boi: 'Kiểm tra độ phẳng của giấy', ma_mang: 'Màng mờ', kho_mang: '75', sl_mang_m: '1500',trang_phu: 'UV định hình logo', dien_tich_ep_kim: '', ma_nhu: '',chiet_quang: 'Không', boi: 'Bồi lên carton 2mm', kieu_be: 'Bế gân, bế đứt',so_khuon_be: '1', khuon_be: 'Khuôn có sẵn (Mã K-021)', ghi_chu_be: '4 con / khuôn, bế thẳng',be_noi: '', xe: 'Có', dan: 'Dán máy tự động', cat_thanh_pham: 'Cắt xén 4 cạnh',thanh_pham_khac: 'Gắn nam châm hít', ghi_chu_thanh_pham: '', ghi_chu_giao_hang: 'Giao làm 2 đợt.', ghi_chu: 'Ưu tiên sản xuất gấp.', nguoi_lap_phieu: 'Nguyễn Thị An (KHSX)', nguoi_duyet: 'Trần Văn Bình (Trưởng phòng SX)', products_json: JSON.stringify(demoProducts), plan_json: JSON.stringify(demoPlan), show_artwork: 'true' }; 
+            const demoProducts = [ { "masp": "SP001 - Hộp quà tặng cao cấp", "dvt": "Cái", "sl_dat": "3000", "sl_tp": "2950", "sl_giao": "1500", "ghi_chu": "Màu đỏ cờ, logo ép kim" }]; 
+            const demoPlan = [ {"cong_doan":"Dán thành phẩm"}, {"cong_doan":"Bế"}, {"cong_doan":"In Offset"}, {"cong_doan":"Cán màng"} ]; 
+            const demoData = {lenh_sx: 'LSX-DEMO-001', ngay_tao_lenh: '2024-07-25', loai_don: 'Sản xuất mới', ten_khach_hang: 'CÔNG TY TNHH THƯƠNG MẠI DỊCH VỤ SQH', quy_trinh_san_xuat: 'In Offset , Cán màng , Bế , Dán thành phẩm', sl_tong: '10500', han_giao_hang: '2024-08-15', hinh_bai_binh_1: 'https://via.placeholder.com/800x600.png?text=Hinh+Bai+Binh+1', products_json: JSON.stringify(demoProducts), plan_json: JSON.stringify(demoPlan), show_artwork: 'true' }; 
             populateProductionOrder(demoData); 
             const watermark = document.createElement('div'); watermark.className = 'demo-watermark'; watermark.innerHTML = 'LỆNH NHÁP'; document.getElementById('bill-container').appendChild(watermark); 
         }
@@ -337,14 +366,12 @@
         
         document.addEventListener('DOMContentLoaded', () => {
             initializeApp();
-            
             const toggleCheckbox = document.getElementById('toggleArtworkPrint');
             if (toggleCheckbox) {
                 const updatePrintClass = () => { document.body.classList.toggle('hide-final-artwork', !toggleCheckbox.checked); };
                 updatePrintClass();
                 toggleCheckbox.addEventListener('change', updatePrintClass);
             }
-
             const lightboxOverlay = document.getElementById('lightbox-overlay');
             const lightboxClose = document.querySelector('.lightbox-close');
             if(lightboxOverlay && lightboxClose) {

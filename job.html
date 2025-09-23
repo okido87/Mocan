@@ -243,6 +243,7 @@
             } 
         }
         
+        // ======================== START: CODE ĐÃ SỬA LỖI ========================
         function renderPlanTable(planJSON) {
             const tableBody = document.getElementById('plan-table-body');
             tableBody.innerHTML = '';
@@ -252,6 +253,8 @@
             }
             try {
                 const plans = JSON.parse(planJSON);
+                // Sửa lỗi: Xử lý mảng rỗng như một trường hợp hợp lệ (chưa có kế hoạch)
+                // thay vì coi nó là một lỗi.
                 if (Array.isArray(plans) && plans.length > 0) {
                     
                     const quyTrinhStr = getUrlParameter('quy_trinh_san_xuat');
@@ -284,13 +287,16 @@
                         tableBody.appendChild(row);
                     });
                 } else {
-                    throw new Error("JSON is not a non-empty array.");
+                    // Nếu mảng rỗng, hiển thị thông báo thân thiện
+                    tableBody.innerHTML = `<tr><td colspan="8" class="center"><em>Chưa có kế hoạch sản xuất.</em></td></tr>`;
                 }
             } catch (error) {
+                // Khối catch này giờ chỉ bắt các lỗi cú pháp JSON không hợp lệ
                 console.error("Error parsing plan JSON:", error, "Received JSON:", planJSON);
                 tableBody.innerHTML = `<tr><td colspan="8" class="center"><em>Lỗi đọc dữ liệu kế hoạch.</em></td></tr>`;
             }
         }
+        // ======================== END: CODE ĐÃ SỬA LỖI ==========================
 
         function setTextOrHide(elementId, value, parentSelector = '.info-item') { const element = document.getElementById(elementId); const parent = document.getElementById(`parent_${elementId}`) || element.closest(parentSelector); if (value && String(value).trim() !== '' && String(value).trim() !== '0') { if(element) element.textContent = formatNumber(value); if(parent) parent.classList.remove('hidden-item'); } else { if(parent) parent.classList.add('hidden-item'); } }
         

@@ -243,7 +243,6 @@
             } 
         }
         
-        // ======================== START: CODE ĐÃ SỬA LỖI ========================
         function renderPlanTable(planJSON) {
             const tableBody = document.getElementById('plan-table-body');
             tableBody.innerHTML = '';
@@ -253,8 +252,6 @@
             }
             try {
                 const plans = JSON.parse(planJSON);
-                // Sửa lỗi: Xử lý mảng rỗng như một trường hợp hợp lệ (chưa có kế hoạch)
-                // thay vì coi nó là một lỗi.
                 if (Array.isArray(plans) && plans.length > 0) {
                     
                     const quyTrinhStr = getUrlParameter('quy_trinh_san_xuat');
@@ -287,16 +284,13 @@
                         tableBody.appendChild(row);
                     });
                 } else {
-                    // Nếu mảng rỗng, hiển thị thông báo thân thiện
                     tableBody.innerHTML = `<tr><td colspan="8" class="center"><em>Chưa có kế hoạch sản xuất.</em></td></tr>`;
                 }
             } catch (error) {
-                // Khối catch này giờ chỉ bắt các lỗi cú pháp JSON không hợp lệ
                 console.error("Error parsing plan JSON:", error, "Received JSON:", planJSON);
                 tableBody.innerHTML = `<tr><td colspan="8" class="center"><em>Lỗi đọc dữ liệu kế hoạch.</em></td></tr>`;
             }
         }
-        // ======================== END: CODE ĐÃ SỬA LỖI ==========================
 
         function setTextOrHide(elementId, value, parentSelector = '.info-item') { const element = document.getElementById(elementId); const parent = document.getElementById(`parent_${elementId}`) || element.closest(parentSelector); if (value && String(value).trim() !== '' && String(value).trim() !== '0') { if(element) element.textContent = formatNumber(value); if(parent) parent.classList.remove('hidden-item'); } else { if(parent) parent.classList.add('hidden-item'); } }
         
@@ -332,28 +326,34 @@
             const finalArtworkUrl = getFullImageUrl(data.hinh_bai_binh_1);
             displayImage(document.getElementById('artwork-image-container'), finalArtworkUrl, 'Hình bài bình');
             
+            // ======================== START: CODE ĐÃ SỬA VỊ TRÍ HÌNH ========================
             if (data.show_artwork === 'true') { 
                 const footer = document.querySelector('.footer');
                 if (footer) {
-                    const parentElement = footer.parentNode;
-                    
+                    let lastElement = footer; // Bắt đầu định vị từ sau footer
+
                     const artworkUrl1 = getFullImageUrl(data.hinh_bai_binh_1);
                     if (artworkUrl1) { 
                         const artworkPage1 = document.createElement('div'); 
                         artworkPage1.className = 'full-page-artwork';
-                        parentElement.insertBefore(artworkPage1, footer); 
-                        displayImage(artworkPage1, artworkUrl1, 'Hình bài bình 1 khổ lớn'); 
+                        // Chèn vào sau phần tử cuối cùng đã biết (ban đầu là footer)
+                        lastElement.after(artworkPage1); 
+                        displayImage(artworkPage1, artworkUrl1, 'Hình bài bình 1 khổ lớn');
+                        // Cập nhật phần tử cuối cùng là hình ảnh vừa được thêm vào
+                        lastElement = artworkPage1; 
                     } 
                     
                     const artworkUrl2 = getFullImageUrl(data.hinh_bai_binh_2);
                     if (artworkUrl2) { 
                         const artworkPage2 = document.createElement('div'); 
                         artworkPage2.className = 'landscape-page';
-                        parentElement.insertBefore(artworkPage2, footer); 
+                         // Chèn vào sau hình ảnh 1 (hoặc footer nếu hình 1 không tồn tại)
+                        lastElement.after(artworkPage2);
                         displayImage(artworkPage2, artworkUrl2, 'Hình bài bình 2 khổ lớn (Mặt sau)'); 
                     }
                 } 
             }
+            // ======================== END: CODE ĐÃ SỬA VỊ TRÍ HÌNH ==========================
         }
         
         function loadDataFromUrl() { const data = {}; const fields = ['lenh_sx','ngay_tao_lenh','loai_don','ten_khach_hang','quy_trinh_san_xuat','sl_tong','hinh_bai_binh_1', 'hinh_bai_binh_2','ghi_chu_binh_bai','loai_giay_bia','ma_giay_bia','kho_giay_bia_mua','sl_giay_bia_can_to','kho_in_bia','kieu_in_bia','so_mau_in_bia','ghi_chu_giay_bia','loai_giay_ruot','ma_giay_ruot','kho_giay_ruot_mua','sl_giay_ruot_can_to','kho_in_ruot','kieu_in_ruot','so_mau_in_ruot','ghi_chu_giay_ruot','kho_kem','ghi_chu_kem','loai_giay_boi','ma_giay_boi','kho_giay_boi_mua_dxr_cm','sl_giay_boi_can_to','ghi_chu_giay_boi','ma_mang','kho_mang','sl_mang_m','trang_phu','dien_tich_ep_kim','ma_nhu','chiet_quang','boi','kieu_be','so_khuon_be','khuon_be','ghi_chu_be','be_noi','xe','dan','cat_thanh_pham','thanh_pham_khac','ghi_chu_thanh_pham','nguoi_lap_phieu','nguoi_duyet', 'products_json', 'plan_json', 'han_giao_hang', 'show_artwork']; fields.forEach(field => data[field] = getUrlParameter(field)); populateProductionOrder(data); }

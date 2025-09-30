@@ -25,7 +25,10 @@
         .bill-container { background: white; color: #000; position: relative; visibility: hidden; display: flex; flex-direction: column; margin: 20px auto; max-width: 190mm; min-height: 270mm; padding: 10pt; box-shadow: 0 0 10px rgba(0,0,0,0.1); font-size: 10pt; }
         .print-options { position: fixed; top: 10px; right: 10px; background: #f0f0f0; padding: 10px; border: 1px solid #ccc; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 8px; }
         .print-options button { min-width: 120px; margin: 0; padding: 8px 12px; height: 44px; cursor: pointer; border: none; border-radius: 5px; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.2s ease-in-out; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; gap: 8px; }
-        .print-options button.btn-print { background-color: #6c757d; } .print-options button.btn-pdf { background-color: #dc3545; }
+        .print-options button.btn-print { background-color: #6c757d; }
+        .print-options button.btn-pdf { background-color: #dc3545; }
+        /* THÊM MỚI: CSS cho nút PNG */
+        .print-options button.btn-png { background-color: #007bff; }
         
         .print-options .option-item { display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #fff; border: 1px solid #ddd; border-radius: 5px; font-size: 13px; color: #333; cursor: pointer; user-select: none; }
         .print-options .option-item input[type="checkbox"] { margin-right: 5px; width: 16px; height: 16px; cursor: pointer; }
@@ -71,7 +74,10 @@
         .spec-table tr td:first-child, .order-info-line span { color: #000; }
         .spec-table tfoot td { color: #000; font-weight: bold; }
         .spec-table tfoot td.center { color: #0056b3; }
-        body.pdf-export-mode .bill-container { display: block; }
+        
+        /* CHỈNH SỬA: Thêm background trắng cho body khi xuất file */
+        body.pdf-export-mode { background: #fff !important; }
+        body.pdf-export-mode .bill-container { display: block; margin: 0 !important; box-shadow: none !important; }
         .landscape-page { display: none; }
 
         .lightbox-overlay { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); justify-content: center; align-items: center; animation: fadeIn 0.3s; }
@@ -111,9 +117,11 @@
 <body class="format-a4">
     <div id="loading-overlay"><div class="spinner"></div></div>
     
+    <!-- THÊM NÚT TẢI PNG VÀ ICON TƯƠNG ỨNG -->
     <div class="print-options no-print">
         <button class="btn-print" onclick="window.print()" title="In Phiếu"><svg viewBox="0 0 24 24" width="24" height="24" fill="white"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg><span>In</span></button>
         <button id="btn-pdf" class="btn-pdf" onclick="downloadPDF()" title="Tải về file PDF"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1m-1 4v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.708L7.5 11.293V7.5a.5.5 0 0 1 1 0"/></svg><span>Tải PDF</span></button>
+        <button id="btn-png" class="btn-png" onclick="downloadPNG()" title="Tải về file PNG"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M4.406 1.342A5.53 5.53 0 0 1 8 0c2.69 0 4.923 2 5.166 4.579C14.758 4.804 16 6.137 16 7.773 16 9.569 14.502 11 12.687 11H10a.5.5 0 0 1 0-1h2.688C13.979 10 15 8.988 15 7.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 2.825 10.328 1 8 1a4.53 4.53 0 0 0-4.406 2.342A.5.5 0 0 1 3 3.5V3a.5.5 0 0 1 .5-.5z"/><path d="M7.646 15.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 14.293V5.5a.5.5 0 0 0-1 0v8.793l-2.146-2.147a.5.5 0 0 0-.708.708z"/></svg><span>Tải PNG</span></button>
         <label class="option-item">
             <input type="checkbox" id="toggleArtworkPrint">
             In hình cuối trang
@@ -121,57 +129,10 @@
     </div>
 
     <div class="bill-container" id="bill-container">
+        <!-- NỘI DUNG FORM IN GIỮ NGUYÊN -->
         <table class="print-layout-table">
-            <thead>
-                <tr>
-                    <td>
-                        <div class="company-header">
-                            <img id="logo-img" src="https://raw.githubusercontent.com/okido87/AppSheet_Print_Form/main/LogoMocAn.png" alt="Logo" class="logo" crossorigin="anonymous">
-                            <div class="header-title-block">
-                                <div class="main-title-line">
-                                    <div class="main-title">Lệnh Sản Xuất <span id="lenh_sx"></span></div>
-                                </div>
-                                <div class="order-info-line">
-                                    <span>Ngày: <span id="ngay_tao_lenh"></span></span><span>|</span><span id="loai_don"></span>
-                                </div>
-                            </div>
-                            <div id="order-qrcode"></div>
-                        </div>
-                    </td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>
-                        <div class="invoice-body">
-                            <div class="section"><div class="section-title">A. THÔNG TIN ĐƠN HÀNG</div><div class="merged-section-layout"><div class="text-content"><div class="grid-container grid-2-col"><div class="info-item full-width"><label>Khách hàng:</label><span id="khach_hang"></span></div><div class="info-item"><label>Hạn giao hàng:</label><span id="han_giao_hang"></span></div><div class="info-item"><label>Tổng SL:</label><span id="sl_tong" class="text-bold"></span></div><div class="info-item full-width"><label>Quy trình sản xuất:</label><span id="quy_trinh_san_xuat"></span></div><div class="info-item full-width" id="parent_ghi_chu_binh_bai"><label>Ghi chú bình bài:</label><span id="ghi_chu_binh_bai"></span></div></div></div><div class="image-content"><div id="artwork-image-container"></div></div></div></div>
-                            <div class="section"><div class="section-title">B. CHI TIẾT VẬT TƯ & IN ẤN</div><table class="spec-table"><thead><tr><th>Hạng mục</th><th>Loại / Mã VT</th><th>Khổ mua (cm)</th><th>SL Cần (Tờ)</th><th>Khổ in</th><th>Kiểu / Màu in</th><th>Ghi chú</th></tr></thead><tbody><tr id="parent_loai_giay_bia"><td class="text-bold">Giấy Bìa</td><td><span id="loai_giay_bia"></span> / <span id="ma_giay_bia"></span></td><td class="center"><span id="kho_giay_bia_mua"></span></td><td class="center text-bold"><span id="sl_giay_bia_can_to"></span></td><td class="center"><span id="kho_in_bia"></span></td><td class="center"><span id="kieu_in_bia"></span> / <span id="so_mau_in_bia"></span></td><td><span id="ghi_chu_giay_bia"></span></td></tr><tr id="parent_loai_giay_ruot"><td class="text-bold">Giấy Ruột</td><td><span id="loai_giay_ruot"></span> / <span id="ma_giay_ruot"></span></td><td class="center"><span id="kho_giay_ruot_mua"></span></td><td class="center text-bold"><span id="sl_giay_ruot_can_to"></span></td><td class="center"><span id="kho_in_ruot"></span></td><td class="center"><span id="kieu_in_ruot"></span> / <span id="so_mau_in_ruot"></span></td><td><span id="ghi_chu_giay_ruot"></span></td></tr><tr id="parent_loai_giay_boi"><td class="text-bold">Giấy Bồi</td><td><span id="loai_giay_boi"></span> / <span id="ma_giay_boi"></span></td><td class="center"><span id="kho_giay_boi_mua_dxr_cm"></span></td><td class="center text-bold"><span id="sl_giay_boi_can_to"></span></td><td class="center">-</td><td class="center">-</td><td><span id="ghi_chu_giay_boi"></span></td></tr><tr id="parent_kho_kem"><td class="text-bold">Kẽm</td><td colspan="3" class="center"><span id="kho_kem"></span></td><td colspan="3"><span id="ghi_chu_kem"></span></td></tr></tbody></table></div>
-                            <div class="section">
-                                <div class="section-title">C. IN ẤN - GIA CÔNG - THÀNH PHẨM</div>
-                                <div class="grid-container grid-2-col">
-                                    <div class="info-item" id="parent_ma_mang"><label>Cán màng:</label><span><span id="ma_mang"></span> / <span id="kho_mang"></span>cm / <span id="sl_mang_m"></span>m</span></div>
-                                    <div class="info-item" id="parent_dien_tich_ep_kim"><label>Ép kim:</label><span>DT: <span id="dien_tich_ep_kim"></span>cm², Mã nhũ: <span id="ma_nhu"></span></span></div>
-                                    <div class="info-item" id="parent_trang_phu"><label>Tráng phủ:</label><span id="trang_phu"></span></div>
-                                    <div class="info-item" id="parent_chiet_quang"><label>Chiết quang:</label><span id="chiet_quang"></span></div>
-                                    <div class="info-item" id="parent_boi"><label>Bồi:</label><span id="boi"></span></div>
-                                    <div class="info-item" id="parent_be_noi"><label>Bế nổi:</label><span id="be_noi"></span></div>
-                                    <div class="info-item" id="parent_kieu_be"><label>Kiểu bế:</label><span id="kieu_be"></span></div>
-                                    <div class="info-item" id="parent_so_khuon_be"><label>Khuôn bế:</label><span><span id="so_khuon_be"></span> khuôn (<span id="khuon_be"></span>)</span></div>
-                                    <div class="info-item" id="parent_ghi_chu_be"><label>Ghi chú bế:</label><span id="ghi_chu_be"></span></div>
-                                    <div class="info-item" id="parent_xe"><label>Xé:</label><span id="xe"></span></div>
-                                    <div class="info-item" id="parent_dan"><label>Dán:</label><span id="dan"></span></div>
-                                    <div class="info-item" id="parent_cat_thanh_pham"><label>Cắt TP:</label><span id="cat_thanh_pham"></span></div>
-                                </div>
-                                <div class="info-item full-width" style="margin-top: 5px;" id="parent_thanh_pham_khac"><label>TP Khác:</label><span id="thanh_pham_khac"></span></div>
-                                <div class="info-item full-width" id="parent_ghi_chu_thanh_pham"><label>Ghi chú TP:</label><span id="ghi_chu_thanh_pham"></span></div>
-                            </div>
-                            <div class="section"><div class="section-title">D. KẾ HOẠCH SẢN XUẤT</div><table class="spec-table"><thead><tr><th style="width:5%">STT</th><th>Công Đoạn / Mô tả</th><th style="width:10%">SL YC</th><th style="width:10%">SL Đạt</th><th style="width:10%">SL Hư</th><th style="width:12%">Ngày SX</th><th style="width:15%">NV sản xuất</th><th>Ghi Chú</th></tr></thead><tbody id="plan-table-body"></tbody></table></div>
-                            <div class="section"><div class="section-title">E. CHI TIẾT SẢN PHẨM VÀ GIAO HÀNG</div><table class="spec-table"><thead><tr><th style="width:5%">STT</th><th>Sản phẩm</th><th style="width:8%">ĐVT</th><th style="width:10%">SL Đặt</th><th style="width:10%">SL TP</th><th style="width:10%">SL Giao</th><th style="width:20%">Ghi Chú</th></tr></thead><tbody id="product-table-body"></tbody><tfoot id="product-summary-footer"></tfoot></table><div class="info-item full-width" style="margin-top: 8px;" id="parent_ghi_chu_giao_hang"><label>Ghi chú Giao Hàng:</label><span id="ghi_chu_giao_hang"></span></div><div class="info-item full-width" id="parent_ghi_chu"><label>Ghi chú Chung:</label><span id="ghi_chu"></span></div></div>
-                        </div>
-                        <div class="footer"><div class="signature-section"><div class="signature-box"><div class="signature-title">Người Lập Phiếu</div><div class="signature-name" id="nguoi_lap_phieu"></div></div><div class="signature-box"><div class="signature-title">Người Duyệt</div><div class="signature-name" id="nguoi_duyet"></div></div></div></div>
-                    </td>
-                </tr>
-            </tbody>
+            <thead><tr><td><div class="company-header"><img id="logo-img" src="https://raw.githubusercontent.com/okido87/AppSheet_Print_Form/main/LogoMocAn.png" alt="Logo" class="logo" crossorigin="anonymous"><div class="header-title-block"><div class="main-title-line"><div class="main-title">Lệnh Sản Xuất <span id="lenh_sx"></span></div></div><div class="order-info-line"><span>Ngày: <span id="ngay_tao_lenh"></span></span><span>|</span><span id="loai_don"></span></div></div><div id="order-qrcode"></div></div></td></tr></thead>
+            <tbody><tr><td><div class="invoice-body"><div class="section"><div class="section-title">A. THÔNG TIN ĐƠN HÀNG</div><div class="merged-section-layout"><div class="text-content"><div class="grid-container grid-2-col"><div class="info-item full-width"><label>Khách hàng:</label><span id="khach_hang"></span></div><div class="info-item"><label>Hạn giao hàng:</label><span id="han_giao_hang"></span></div><div class="info-item"><label>Tổng SL:</label><span id="sl_tong" class="text-bold"></span></div><div class="info-item full-width"><label>Quy trình sản xuất:</label><span id="quy_trinh_san_xuat"></span></div><div class="info-item full-width" id="parent_ghi_chu_binh_bai"><label>Ghi chú bình bài:</label><span id="ghi_chu_binh_bai"></span></div></div></div><div class="image-content"><div id="artwork-image-container"></div></div></div></div><div class="section"><div class="section-title">B. CHI TIẾT VẬT TƯ & IN ẤN</div><table class="spec-table"><thead><tr><th>Hạng mục</th><th>Loại / Mã VT</th><th>Khổ mua (cm)</th><th>SL Cần (Tờ)</th><th>Khổ in</th><th>Kiểu / Màu in</th><th>Ghi chú</th></tr></thead><tbody><tr id="parent_loai_giay_bia"><td class="text-bold">Giấy Bìa</td><td><span id="loai_giay_bia"></span> / <span id="ma_giay_bia"></span></td><td class="center"><span id="kho_giay_bia_mua"></span></td><td class="center text-bold"><span id="sl_giay_bia_can_to"></span></td><td class="center"><span id="kho_in_bia"></span></td><td class="center"><span id="kieu_in_bia"></span> / <span id="so_mau_in_bia"></span></td><td><span id="ghi_chu_giay_bia"></span></td></tr><tr id="parent_loai_giay_ruot"><td class="text-bold">Giấy Ruột</td><td><span id="loai_giay_ruot"></span> / <span id="ma_giay_ruot"></span></td><td class="center"><span id="kho_giay_ruot_mua"></span></td><td class="center text-bold"><span id="sl_giay_ruot_can_to"></span></td><td class="center"><span id="kho_in_ruot"></span></td><td class="center"><span id="kieu_in_ruot"></span> / <span id="so_mau_in_ruot"></span></td><td><span id="ghi_chu_giay_ruot"></span></td></tr><tr id="parent_loai_giay_boi"><td class="text-bold">Giấy Bồi</td><td><span id="loai_giay_boi"></span> / <span id="ma_giay_boi"></span></td><td class="center"><span id="kho_giay_boi_mua_dxr_cm"></span></td><td class="center text-bold"><span id="sl_giay_boi_can_to"></span></td><td class="center">-</td><td class="center">-</td><td><span id="ghi_chu_giay_boi"></span></td></tr><tr id="parent_kho_kem"><td class="text-bold">Kẽm</td><td colspan="3" class="center"><span id="kho_kem"></span></td><td colspan="3"><span id="ghi_chu_kem"></span></td></tr></tbody></table></div><div class="section"><div class="section-title">C. IN ẤN - GIA CÔNG - THÀNH PHẨM</div><div class="grid-container grid-2-col"><div class="info-item" id="parent_ma_mang"><label>Cán màng:</label><span><span id="ma_mang"></span> / <span id="kho_mang"></span>cm / <span id="sl_mang_m"></span>m</span></div><div class="info-item" id="parent_dien_tich_ep_kim"><label>Ép kim:</label><span>DT: <span id="dien_tich_ep_kim"></span>cm², Mã nhũ: <span id="ma_nhu"></span></span></div><div class="info-item" id="parent_trang_phu"><label>Tráng phủ:</label><span id="trang_phu"></span></div><div class="info-item" id="parent_chiet_quang"><label>Chiết quang:</label><span id="chiet_quang"></span></div><div class="info-item" id="parent_boi"><label>Bồi:</label><span id="boi"></span></div><div class="info-item" id="parent_be_noi"><label>Bế nổi:</label><span id="be_noi"></span></div><div class="info-item" id="parent_kieu_be"><label>Kiểu bế:</label><span id="kieu_be"></span></div><div class="info-item" id="parent_so_khuon_be"><label>Khuôn bế:</label><span><span id="so_khuon_be"></span> khuôn (<span id="khuon_be"></span>)</span></div><div class="info-item" id="parent_ghi_chu_be"><label>Ghi chú bế:</label><span id="ghi_chu_be"></span></div><div class="info-item" id="parent_xe"><label>Xé:</label><span id="xe"></span></div><div class="info-item" id="parent_dan"><label>Dán:</label><span id="dan"></span></div><div class="info-item" id="parent_cat_thanh_pham"><label>Cắt TP:</label><span id="cat_thanh_pham"></span></div></div><div class="info-item full-width" style="margin-top: 5px;" id="parent_thanh_pham_khac"><label>TP Khác:</label><span id="thanh_pham_khac"></span></div><div class="info-item full-width" id="parent_ghi_chu_thanh_pham"><label>Ghi chú TP:</label><span id="ghi_chu_thanh_pham"></span></div></div><div class="section"><div class="section-title">D. KẾ HOẠCH SẢN XUẤT</div><table class="spec-table"><thead><tr><th style="width:5%">STT</th><th>Công Đoạn / Mô tả</th><th style="width:10%">SL YC</th><th style="width:10%">SL Đạt</th><th style="width:10%">SL Hư</th><th style="width:12%">Ngày SX</th><th style="width:15%">NV sản xuất</th><th>Ghi Chú</th></tr></thead><tbody id="plan-table-body"></tbody></table></div><div class="section"><div class="section-title">E. CHI TIẾT SẢN PHẨM VÀ GIAO HÀNG</div><table class="spec-table"><thead><tr><th style="width:5%">STT</th><th>Sản phẩm</th><th style="width:8%">ĐVT</th><th style="width:10%">SL Đặt</th><th style="width:10%">SL TP</th><th style="width:10%">SL Giao</th><th style="width:20%">Ghi Chú</th></tr></thead><tbody id="product-table-body"></tbody><tfoot id="product-summary-footer"></tfoot></table><div class="info-item full-width" style="margin-top: 8px;" id="parent_ghi_chu_giao_hang"><label>Ghi chú Giao Hàng:</label><span id="ghi_chu_giao_hang"></span></div><div class="info-item full-width" id="parent_ghi_chu"><label>Ghi chú Chung:</label><span id="ghi_chu"></span></div></div></div><div class="footer"><div class="signature-section"><div class="signature-box"><div class="signature-title">Người Lập Phiếu</div><div class="signature-name" id="nguoi_lap_phieu"></div></div><div class="signature-box"><div class="signature-title">Người Duyệt</div><div class="signature-name" id="nguoi_duyet"></div></div></div></div></td></tr></tbody>
         </table>
     </div>
     
@@ -182,7 +143,68 @@
 
     <script>
         async function convertImageToBase64(imgElement) { if (!imgElement || !imgElement.src || imgElement.src.startsWith('data:image')) return; const originalSrc = imgElement.src; try { const response = await fetch(originalSrc, { cache: 'force-cache' }); if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`); const blob = await response.blob(); return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onloadend = () => { imgElement.src = reader.result; resolve(true); }; reader.onerror = reject; reader.readAsDataURL(blob); }); } catch (error) { console.error(`Failed to fetch or convert image: ${originalSrc}`, error); return false; } }
-        async function downloadPDF() { const pdfBtn = document.getElementById('btn-pdf'); const originalBtnContent = pdfBtn.innerHTML; pdfBtn.disabled = true; pdfBtn.innerHTML = '<div class="spinner-small"></div><span>Đang tạo...</span>'; document.body.classList.add('pdf-export-mode'); const element = document.querySelector('.bill-container'); const orderId = document.getElementById('lenh_sx').textContent || 'unknown'; const filename = `LSX-${orderId}.pdf`; const allImages = Array.from(document.querySelectorAll('#logo-img, #artwork-image-container img, .full-page-artwork img, .landscape-page img')); await Promise.all(allImages.map(img => convertImageToBase64(img))); const opt = { margin: [8, 6, 8, 6], filename: filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 3, useCORS: true, logging: false }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }; try { await html2pdf().from(element).set(opt).save(); } catch (error) { console.error("Error creating PDF:", error); } finally { pdfBtn.disabled = false; pdfBtn.innerHTML = originalBtnContent; document.body.classList.remove('pdf-export-mode'); } }
+        
+        async function downloadPDF() {
+            const pdfBtn = document.getElementById('btn-pdf');
+            const originalBtnContent = pdfBtn.innerHTML;
+            pdfBtn.disabled = true;
+            pdfBtn.innerHTML = '<div class="spinner-small"></div><span>Đang tạo...</span>';
+            document.body.classList.add('pdf-export-mode');
+            
+            setTimeout(async () => {
+                const element = document.querySelector('.bill-container');
+                const orderId = document.getElementById('lenh_sx').textContent || 'unknown';
+                const filename = `LSX-${orderId}.pdf`;
+                const allImages = Array.from(document.querySelectorAll('#logo-img, #artwork-image-container img, .full-page-artwork img, .landscape-page img'));
+                await Promise.all(allImages.map(img => convertImageToBase64(img)));
+                const opt = { margin: [8, 6, 8, 6], filename: filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 3, useCORS: true, logging: false }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+                try {
+                    await html2pdf().from(element).set(opt).save();
+                } catch (error) {
+                    console.error("Error creating PDF:", error);
+                } finally {
+                    pdfBtn.disabled = false;
+                    pdfBtn.innerHTML = originalBtnContent;
+                    document.body.classList.remove('pdf-export-mode');
+                }
+            }, 50);
+        }
+
+        // --- HÀM MỚI: TẢI PNG ---
+        async function downloadPNG() {
+            const pngBtn = document.getElementById('btn-png');
+            const originalBtnContent = pngBtn.innerHTML;
+            pngBtn.disabled = true;
+            pngBtn.innerHTML = '<div class="spinner-small"></div><span>Đang tạo...</span>';
+            document.body.classList.add('pdf-export-mode');
+
+            setTimeout(async () => {
+                const element = document.querySelector('.bill-container');
+                const orderId = document.getElementById('lenh_sx').textContent || 'unknown';
+                const filename = `LSX-${orderId}.png`;
+                
+                try {
+                    const allImages = Array.from(document.querySelectorAll('#logo-img, #artwork-image-container img, .full-page-artwork img, .landscape-page img'));
+                    await Promise.all(allImages.map(img => convertImageToBase64(img)));
+                    
+                    const canvas = await html2canvas(element, { scale: 3, useCORS: true, logging: false });
+                    
+                    const link = document.createElement('a');
+                    link.download = filename;
+                    link.href = canvas.toDataURL('image/png');
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } catch (error) {
+                    console.error("Error creating PNG:", error);
+                } finally {
+                    pngBtn.disabled = false;
+                    pngBtn.innerHTML = originalBtnContent;
+                    document.body.classList.remove('pdf-export-mode');
+                }
+            }, 50);
+        }
+
         function getUrlParameter(name) { return decodeURIComponent((new URLSearchParams(window.location.search).get(name) || '').replace(/\+/g, ' ')); }
         const formatNumber = (value) => { if (!value || isNaN(Number(value))) return value; return Number(value).toLocaleString('vi-VN'); };
         
@@ -272,11 +294,15 @@
                         const slDatValue = parseFloat(p.sl_dat) || 0;
                         let ngaySXDisplay = '';
                         if (slDatValue > 0 && p.han_hoan_thanh) {
-                            const parts = p.han_hoan_thanh.split('/');
-                            if (parts.length === 3) {
-                                ngaySXDisplay = new Date(parts[2], parts[0] - 1, parts[1]).toLocaleDateString('vi-VN');
+                            const date = new Date(p.han_hoan_thanh);
+                            if (!isNaN(date.getTime())) {
+                                ngaySXDisplay = date.toLocaleDateString('vi-VN');
                             } else {
-                                ngaySXDisplay = new Date(p.han_hoan_thanh).toLocaleDateString('vi-VN');
+                                // Fallback for "mm/dd/yyyy" from appsheet
+                                const parts = p.han_hoan_thanh.split('/');
+                                if(parts.length === 3) {
+                                    ngaySXDisplay = `${parts[1]}/${parts[0]}/${parts[2]}`;
+                                }
                             }
                         }
                         
@@ -292,7 +318,7 @@
             }
         }
 
-        function setTextOrHide(elementId, value, parentSelector = '.info-item') { const element = document.getElementById(elementId); const parent = document.getElementById(`parent_${elementId}`) || element.closest(parentSelector); if (value && String(value).trim() !== '' && String(value).trim() !== '0') { if(element) element.textContent = formatNumber(value); if(parent) parent.classList.remove('hidden-item'); } else { if(parent) parent.classList.add('hidden-item'); } }
+        function setTextOrHide(elementId, value, parentSelector = '.info-item') { const element = document.getElementById(elementId); const parent = document.getElementById(`parent_${elementId}`) || (element ? element.closest(parentSelector) : null); if (value && String(value).trim() !== '' && String(value).trim() !== '0') { if(element) element.textContent = formatNumber(value); if(parent) parent.classList.remove('hidden-item'); } else { if(parent) parent.classList.add('hidden-item'); } }
         
         function populateProductionOrder(data) {
             const imageBaseUrl = "https://www.appsheet.com/image/getimageurl?appName=MocAnSystem-777046908&tableName=LSX&fileName=";
@@ -306,9 +332,9 @@
             const setText = (id, value, isNumeric = false) => { const el = document.getElementById(id); if (el) el.textContent = isNumeric ? formatNumber(value) : (value || ''); };
             
             setText('lenh_sx', data.lenh_sx);
-            if (data.ngay_tao_lenh) { setText('ngay_tao_lenh', new Date(data.ngay_tao_lenh.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')).toLocaleDateString('vi-VN')); }
+            if (data.ngay_tao_lenh) { const date = new Date(data.ngay_tao_lenh); if(!isNaN(date.getTime())) setText('ngay_tao_lenh', date.toLocaleDateString('vi-VN')); }
             setText('loai_don', data.loai_don); setText('khach_hang', data.ten_khach_hang); setText('sl_tong', data.sl_tong, true); setText('nguoi_lap_phieu', data.nguoi_lap_phieu); setText('nguoi_duyet', data.nguoi_duyet);
-            if (data.han_giao_hang) { setText('han_giao_hang', new Date(data.han_giao_hang.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')).toLocaleDateString('vi-VN')); }
+            if (data.han_giao_hang) { const date = new Date(data.han_giao_hang); if(!isNaN(date.getTime())) setText('han_giao_hang', date.toLocaleDateString('vi-VN')); }
             
             setTextOrHide('quy_trinh_san_xuat', data.quy_trinh_san_xuat); setTextOrHide('ghi_chu_binh_bai', data.ghi_chu_binh_bai); setTextOrHide('loai_giay_bia', data.loai_giay_bia, 'tr'); setTextOrHide('loai_giay_ruot', data.loai_giay_ruot, 'tr'); setTextOrHide('loai_giay_boi', data.loai_giay_boi, 'tr'); setTextOrHide('kho_kem', data.kho_kem, 'tr'); setTextOrHide('ma_mang', data.ma_mang); setTextOrHide('dien_tich_ep_kim', data.dien_tich_ep_kim); setTextOrHide('trang_phu', data.trang_phu); setTextOrHide('chiet_quang', data.chiet_quang); setTextOrHide('boi', data.boi); setTextOrHide('be_noi', data.be_noi); setTextOrHide('kieu_be', data.kieu_be); setTextOrHide('so_khuon_be', data.so_khuon_be); setTextOrHide('ghi_chu_be', data.ghi_chu_be); setTextOrHide('xe', data.xe); setTextOrHide('dan', data.dan); setTextOrHide('cat_thanh_pham', data.cat_thanh_pham); setTextOrHide('thanh_pham_khac', data.thanh_pham_khac); setTextOrHide('ghi_chu_thanh_pham', data.ghi_chu_thanh_pham); setTextOrHide('ghi_chu_giao_hang', data.ghi_chu_giao_hang); setTextOrHide('ghi_chu', data.ghi_chu);
             if (data.loai_giay_bia) { setText('ma_giay_bia', data.ma_giay_bia); setText('kho_giay_bia_mua', data.kho_giay_bia_mua); setText('sl_giay_bia_can_to', data.sl_giay_bia_can_to, true); setText('kho_in_bia', data.kho_in_bia); setText('kieu_in_bia', data.kieu_in_bia); setText('so_mau_in_bia', data.so_mau_in_bia); setText('ghi_chu_giay_bia', data.ghi_chu_giay_bia); }
@@ -326,34 +352,24 @@
             const finalArtworkUrl = getFullImageUrl(data.hinh_bai_binh_1);
             displayImage(document.getElementById('artwork-image-container'), finalArtworkUrl, 'Hình bài bình');
             
-            // ======================== START: CODE ĐÃ SỬA VỊ TRÍ HÌNH ========================
-            if (data.show_artwork === 'true') { 
-                const footer = document.querySelector('.footer');
-                if (footer) {
-                    let lastElement = footer; // Bắt đầu định vị từ sau footer
-
-                    const artworkUrl1 = getFullImageUrl(data.hinh_bai_binh_1);
-                    if (artworkUrl1) { 
-                        const artworkPage1 = document.createElement('div'); 
-                        artworkPage1.className = 'full-page-artwork';
-                        // Chèn vào sau phần tử cuối cùng đã biết (ban đầu là footer)
-                        lastElement.after(artworkPage1); 
-                        displayImage(artworkPage1, artworkUrl1, 'Hình bài bình 1 khổ lớn');
-                        // Cập nhật phần tử cuối cùng là hình ảnh vừa được thêm vào
-                        lastElement = artworkPage1; 
-                    } 
-                    
-                    const artworkUrl2 = getFullImageUrl(data.hinh_bai_binh_2);
-                    if (artworkUrl2) { 
-                        const artworkPage2 = document.createElement('div'); 
-                        artworkPage2.className = 'landscape-page';
-                         // Chèn vào sau hình ảnh 1 (hoặc footer nếu hình 1 không tồn tại)
-                        lastElement.after(artworkPage2);
-                        displayImage(artworkPage2, artworkUrl2, 'Hình bài bình 2 khổ lớn (Mặt sau)'); 
-                    }
+            const containerForExtraArtworks = document.querySelector('.bill-container');
+            if (data.show_artwork === 'true' && containerForExtraArtworks) { 
+                let lastElement = containerForExtraArtworks.querySelector('.footer');
+                const artworkUrl1 = getFullImageUrl(data.hinh_bai_binh_1);
+                if (artworkUrl1) { 
+                    const artworkPage1 = document.createElement('div'); 
+                    artworkPage1.className = 'full-page-artwork';
+                    lastElement.before(artworkPage1);
+                    displayImage(artworkPage1, artworkUrl1, 'Hình bài bình 1 khổ lớn');
                 } 
+                const artworkUrl2 = getFullImageUrl(data.hinh_bai_binh_2);
+                if (artworkUrl2) { 
+                    const artworkPage2 = document.createElement('div'); 
+                    artworkPage2.className = 'landscape-page';
+                    lastElement.before(artworkPage2);
+                    displayImage(artworkPage2, artworkUrl2, 'Hình bài bình 2 khổ lớn (Mặt sau)'); 
+                }
             }
-            // ======================== END: CODE ĐÃ SỬA VỊ TRÍ HÌNH ==========================
         }
         
         function loadDataFromUrl() { const data = {}; const fields = ['lenh_sx','ngay_tao_lenh','loai_don','ten_khach_hang','quy_trinh_san_xuat','sl_tong','hinh_bai_binh_1', 'hinh_bai_binh_2','ghi_chu_binh_bai','loai_giay_bia','ma_giay_bia','kho_giay_bia_mua','sl_giay_bia_can_to','kho_in_bia','kieu_in_bia','so_mau_in_bia','ghi_chu_giay_bia','loai_giay_ruot','ma_giay_ruot','kho_giay_ruot_mua','sl_giay_ruot_can_to','kho_in_ruot','kieu_in_ruot','so_mau_in_ruot','ghi_chu_giay_ruot','kho_kem','ghi_chu_kem','loai_giay_boi','ma_giay_boi','kho_giay_boi_mua_dxr_cm','sl_giay_boi_can_to','ghi_chu_giay_boi','ma_mang','kho_mang','sl_mang_m','trang_phu','dien_tich_ep_kim','ma_nhu','chiet_quang','boi','kieu_be','so_khuon_be','khuon_be','ghi_chu_be','be_noi','xe','dan','cat_thanh_pham','thanh_pham_khac','ghi_chu_thanh_pham','nguoi_lap_phieu','nguoi_duyet', 'products_json', 'plan_json', 'han_giao_hang', 'show_artwork']; fields.forEach(field => data[field] = getUrlParameter(field)); populateProductionOrder(data); }

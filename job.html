@@ -82,7 +82,7 @@
         .print-layout-table > thead > tr, .print-layout-table > tbody > tr,
         .print-layout-table > thead > tr > td, .print-layout-table > tbody > tr > td { display: contents; }
 
-        /* === CSS MỚI DÀNH RIÊNG CHO VIỆC XUẤT PNG === */
+        /* === CSS DÀNH RIÊNG CHO VIỆC XUẤT PNG === */
         #png-layout-container {
             display: none;
             width: fit-content;
@@ -96,7 +96,7 @@
             padding: 10pt;
             font-family: 'Times New Roman', Times, serif;
             font-size: 10pt;
-            display: flex; /* Dùng flexbox để co giãn nội dung */
+            display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
@@ -106,7 +106,7 @@
         .png-page .print-layout-table {
             display: flex;
             flex-direction: column;
-            flex-grow: 1; /* Cho phép table co giãn */
+            flex-grow: 1;
         }
         .png-page .print-layout-table > thead,
         .png-page .print-layout-table > tbody {
@@ -123,7 +123,8 @@
         }
         body.png-export-mode #png-layout-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, 190mm); /* Tự động thêm cột */
+            /* === SỬA LỖI: Cố định 2 cột để tạo layout zigzag === */
+            grid-template-columns: repeat(2, 190mm);
             gap: 0;
             padding: 0;
         }
@@ -176,7 +177,6 @@
         // === HÀM MỚI: CHUẨN BỊ LAYOUT CHO VIỆC XUẤT PNG ===
         function prepareLayoutForPNG() {
             const originalContainer = document.getElementById('bill-container');
-            // Tìm tất cả các loại trang ảnh
             const artworkPages = Array.from(originalContainer.querySelectorAll('.full-page-artwork, .landscape-page'));
             const shouldPrintArtwork = document.getElementById('toggleArtworkPrint')?.checked ?? true;
 
@@ -187,17 +187,13 @@
             const layoutContainer = document.createElement('div');
             layoutContainer.id = 'png-layout-container';
 
-            // Trang 1: Sao chép nội dung chính (không bao gồm trang ảnh)
             const mainPage = document.createElement('div');
             mainPage.className = 'png-page';
-            // Vì layout gốc là table, chúng ta cần clone cả table
             const mainContentTable = originalContainer.querySelector('.print-layout-table').cloneNode(true);
-            // Xóa các trang ảnh khỏi bản clone
             mainContentTable.querySelectorAll('.full-page-artwork, .landscape-page').forEach(el => el.remove());
             mainPage.appendChild(mainContentTable);
             layoutContainer.appendChild(mainPage);
 
-            // Các trang sau: Sao chép từng trang ảnh
             artworkPages.forEach(artworkNode => {
                 const artworkPage = document.createElement('div');
                 artworkPage.className = 'png-page';
@@ -217,10 +213,8 @@
             return { elementToPrint: layoutContainer, cleanup };
         }
         
-        // --- CÁC HÀM TIỆN ÍCH (Giữ nguyên) ---
         async function convertImageToBase64(imgElement) { if (!imgElement || !imgElement.src || imgElement.src.startsWith('data:image')) return; const originalSrc = imgElement.src; try { const response = await fetch(originalSrc, { cache: 'force-cache' }); if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`); const blob = await response.blob(); return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onloadend = () => { imgElement.src = reader.result; resolve(true); }; reader.onerror = reject; reader.readAsDataURL(blob); }); } catch (error) { console.error(`Failed to fetch or convert image: ${originalSrc}`, error); return false; } }
         
-        // --- HÀM TẢI PDF (Giữ nguyên) ---
         async function downloadPDF() {
             const pdfBtn = document.getElementById('btn-pdf');
             const originalBtnContent = pdfBtn.innerHTML;
@@ -247,7 +241,6 @@
             }, 50);
         }
 
-        // --- HÀM TẢI PNG (Cập nhật để dùng layout mới) ---
         async function downloadPNG() {
             const pngBtn = document.getElementById('btn-png');
             const originalBtnContent = pngBtn.innerHTML;
@@ -280,7 +273,6 @@
             }
         }
 
-        // --- TOÀN BỘ CÁC HÀM CÒN LẠI GIỮ NGUYÊN NHƯ BẢN GỐC ---
         function getUrlParameter(name) { return decodeURIComponent((new URLSearchParams(window.location.search).get(name) || '').replace(/\+/g, ' ')); }
         const formatNumber = (value) => { if (!value || isNaN(Number(value))) return value; return Number(value).toLocaleString('vi-VN'); };
         
@@ -429,9 +421,7 @@
             
             const containerForExtraArtworks = document.querySelector('.bill-container');
             if (data.show_artwork === 'true' && containerForExtraArtworks) { 
-                // Xóa các trang ảnh cũ nếu có, để tránh trùng lặp
                 containerForExtraArtworks.querySelectorAll('.full-page-artwork, .landscape-page').forEach(el => el.remove());
-                
                 let lastElement = containerForExtraArtworks.querySelector('.footer');
                 const artworkUrl1 = getFullImageUrl(data.hinh_bai_binh_1);
                 if (artworkUrl1) { 
@@ -464,7 +454,6 @@
             initializeApp();
             const toggleCheckbox = document.getElementById('toggleArtworkPrint');
             if (toggleCheckbox) {
-                // Đặt giá trị mặc định là "checked"
                 toggleCheckbox.checked = true;
                 const updatePrintClass = () => { document.body.classList.toggle('hide-final-artwork', !toggleCheckbox.checked); };
                 updatePrintClass();

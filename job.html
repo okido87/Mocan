@@ -32,7 +32,6 @@
         .print-options .option-item input[type="checkbox"] { margin-right: 5px; width: 16px; height: 16px; cursor: pointer; }
         body.hide-final-artwork .full-page-artwork,
         body.hide-final-artwork .landscape-page { display: none !important; }
-
         .company-header { display: flex; align-items: center; justify-content: space-between; gap: 15px; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px;}
         .footer { padding-top: 10px; margin-top: auto; }
         .signature-section { display: flex; justify-content: space-around; text-align: center; page-break-inside: avoid; margin-top: 0; }
@@ -81,7 +80,13 @@
         .print-layout-table, .print-layout-table > thead, .print-layout-table > tbody,
         .print-layout-table > thead > tr, .print-layout-table > tbody > tr,
         .print-layout-table > thead > tr > td, .print-layout-table > tbody > tr > td { display: contents; }
-
+        #png-layout-container { display: none; width: fit-content; background: #fff; }
+        .png-page { width: 190mm; height: 270mm; background: white; color: #000; padding: 10pt; font-family: 'Times New Roman', Times, serif; font-size: 10pt; display: flex; flex-direction: column; position: relative; overflow: hidden; box-sizing: border-box; border: 1px solid #f0f0f0; }
+        .png-page .print-layout-table { display: flex; flex-direction: column; flex-grow: 1; }
+        .png-page .print-layout-table > thead, .png-page .print-layout-table > tbody { display: contents; }
+        .png-page .full-page-artwork, .png-page .landscape-page { page-break-before: unset; height: 100%; width: 100%; }
+        body.png-export-mode .bill-container { display: none; }
+        body.png-export-mode #png-layout-container { display: grid; grid-template-columns: repeat(2, 190mm); gap: 0; padding: 0; }
         @media print { 
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white !important; margin: 0 !important; padding: 0 !important; overflow: visible; } 
             .no-print, #loading-overlay, .demo-watermark, .lightbox-overlay { display: none !important; } 
@@ -139,7 +144,29 @@
                 </table>
             </div>
 
-            <div class="section"><div class="section-title">C. IN ẤN - GIA CÔNG - THÀNH PHẨM</div><div class="grid-container grid-2-col"><div class="info-item" id="parent_ma_mang"><label>Cán màng:</label><span><span id="ma_mang"></span> / <span id="kho_mang"></span>cm / <span id="sl_mang_m"></span>m</span></div><div class="info-item" id="parent_dien_tich_ep_kim"><label>Ép kim:</label><span>DT: <span id="dien_tich_ep_kim"></span>cm², Mã nhũ: <span id="ma_nhu"></span></span></div><div class="info-item" id="parent_trang_phu"><label>Tráng phủ:</label><span id="trang_phu"></span></div><div class="info-item" id="parent_chiet_quang"><label>Chiết quang:</label><span id="chiet_quang"></span></div><div class="info-item" id="parent_boi"><label>Bồi:</label><span id="boi"></span></div><div class="info-item" id="parent_be_noi"><label>Bế nổi:</label><span id="be_noi"></span></div><div class="info-item" id="parent_kieu_be"><label>Kiểu bế:</label><span id="kieu_be"></span></div><div class="info-item" id="parent_so_khuon_be"><label>Khuôn bế:</label><span><span id="so_khuon_be"></span> khuôn (<span id="khuon_be"></span>)</span></div><div class="info-item" id="parent_ghi_chu_be"><label>Ghi chú bế:</label><span id="ghi_chu_be"></span></div><div class="info-item" id="parent_xe"><label>Xé:</label><span id="xe"></span></div><div class="info-item" id="parent_dan"><label>Dán:</label><span id="dan"></span></div><div class="info-item" id="parent_cat_thanh_pham"><label>Cắt TP:</label><span id="cat_thanh_pham"></span></div></div><div class="info-item full-width" style="margin-top: 5px;" id="parent_thanh_pham_khac"><label>TP Khác:</label><span id="thanh_pham_khac"></span></div><div class="info-item full-width" id="parent_ghi_chu_thanh_pham"><label>Ghi chú TP:</label><span id="ghi_chu_thanh_pham"></span></div></div><div class="section"><div class="section-title">D. KẾ HOẠCH SẢN XUẤT</div><table class="spec-table"><thead><tr><th style="width:5%">STT</th><th>Công Đoạn / Mô tả</th><th style="width:10%">SL YC</th><th style="width:10%">SL Đạt</th><th style="width:10%">SL Hư</th><th style="width:12%">Ngày SX</th><th style="width:15%">NV sản xuất</th><th>Ghi Chú</th></tr></thead><tbody id="plan-table-body"></tbody></table></div><div class="section"><div class="section-title">E. CHI TIẾT SẢN PHẨM VÀ GIAO HÀNG</div><table class="spec-table"><thead><tr><th style="width:5%">STT</th><th>Sản phẩm</th><th style="width:8%">ĐVT</th><th style="width:10%">SL Đặt</th><th style="width:10%">SL TP</th><th style="width:10%">SL Giao</th><th style="width:20%">Ghi Chú</th></tr></thead><tbody id="product-table-body"></tbody><tfoot id="product-summary-footer"></tfoot></table><div class="info-item full-width" style="margin-top: 8px;" id="parent_ghi_chu_giao_hang"><label>Ghi chú Giao Hàng:</label><span id="ghi_chu_giao_hang"></span></div><div class="info-item full-width" id="parent_ghi_chu"><label>Ghi chú Chung:</label><span id="ghi_chu"></span></div></div></div><div class="footer"><div class="signature-section"><div class="signature-box"><div class="signature-title">Người Lập Phiếu</div><div class="signature-name" id="nguoi_lap_phieu"></div></div><div class="signature-box"><div class="signature-title">Người Duyệt</div><div class="signature-name" id="nguoi_duyet"></div></div></div></div></td></tr></tbody>
+            <div class="section"><div class="section-title">C. IN ẤN - GIA CÔNG - THÀNH PHẨM</div><div class="grid-container grid-2-col"><div class="info-item" id="parent_ma_mang"><label>Cán màng:</label><span><span id="ma_mang"></span> / <span id="kho_mang"></span>cm / <span id="sl_mang_m"></span>m</span></div><div class="info-item" id="parent_dien_tich_ep_kim"><label>Ép kim:</label><span>DT: <span id="dien_tich_ep_kim"></span>cm², Mã nhũ: <span id="ma_nhu"></span></span></div><div class="info-item" id="parent_trang_phu"><label>Tráng phủ:</label><span id="trang_phu"></span></div><div class="info-item" id="parent_chiet_quang"><label>Chiết quang:</label><span id="chiet_quang"></span></div><div class="info-item" id="parent_boi"><label>Bồi:</label><span id="boi"></span></div><div class="info-item" id="parent_be_noi"><label>Bế nổi:</label><span id="be_noi"></span></div><div class="info-item" id="parent_kieu_be"><label>Kiểu bế:</label><span id="kieu_be"></span></div><div class="info-item" id="parent_so_khuon_be"><label>Khuôn bế:</label><span><span id="so_khuon_be"></span> khuôn (<span id="khuon_be"></span>)</span></div><div class="info-item" id="parent_ghi_chu_be"><label>Ghi chú bế:</label><span id="ghi_chu_be"></span></div><div class="info-item" id="parent_xe"><label>Xé:</label><span id="xe"></span></div><div class="info-item" id="parent_dan"><label>Dán:</label><span id="dan"></span></div><div class="info-item" id="parent_cat_thanh_pham"><label>Cắt TP:</label><span id="cat_thanh_pham"></span></div></div><div class="info-item full-width" style="margin-top: 5px;" id="parent_thanh_pham_khac"><label>TP Khác:</label><span id="thanh_pham_khac"></span></div><div class="info-item full-width" id="parent_ghi_chu_thanh_pham"><label>Ghi chú TP:</label><span id="ghi_chu_thanh_pham"></span></div></div>
+            
+            <!-- =========== START: UPDATED SECTION D =========== -->
+            <div class="section">
+                <div class="section-title">D. KẾ HOẠCH SẢN XUẤT</div>
+                <table class="spec-table">
+                    <thead>
+                        <tr>
+                            <th style="width:5%">STT</th>
+                            <th>Công Đoạn / Mô tả</th>
+                            <th style="width:10%">SL YC</th>
+                            <th style="width:10%">SL Đạt</th>
+                            <th style="width:10%">SL Hư</th>
+                            <th style="width:15%">NV sản xuất</th>
+                            <th>Ghi Chú</th>
+                        </tr>
+                    </thead>
+                    <tbody id="plan-table-body"></tbody>
+                </table>
+            </div>
+            <!-- =========== END: UPDATED SECTION D =========== -->
+
+            <div class="section"><div class="section-title">E. CHI TIẾT SẢN PHẨM VÀ GIAO HÀNG</div><table class="spec-table"><thead><tr><th style="width:5%">STT</th><th>Sản phẩm</th><th style="width:8%">ĐVT</th><th style="width:10%">SL Đặt</th><th style="width:10%">SL TP</th><th style="width:10%">SL Giao</th><th style="width:20%">Ghi Chú</th></tr></thead><tbody id="product-table-body"></tbody><tfoot id="product-summary-footer"></tfoot></table><div class="info-item full-width" style="margin-top: 8px;" id="parent_ghi_chu_giao_hang"><label>Ghi chú Giao Hàng:</label><span id="ghi_chu_giao_hang"></span></div><div class="info-item full-width" id="parent_ghi_chu"><label>Ghi chú Chung:</label><span id="ghi_chu"></span></div></div></div><div class="footer"><div class="signature-section"><div class="signature-box"><div class="signature-title">Người Lập Phiếu</div><div class="signature-name" id="nguoi_lap_phieu"></div></div><div class="signature-box"><div class="signature-title">Người Duyệt</div><div class="signature-name" id="nguoi_duyet"></div></div></div></div></td></tr></tbody>
         </table>
     </div>
     
@@ -149,6 +176,37 @@
     </div>
 
     <script>
+        function prepareLayoutForPNG() {
+            const originalContainer = document.getElementById('bill-container');
+            const artworkPages = Array.from(originalContainer.querySelectorAll('.full-page-artwork, .landscape-page'));
+            const shouldPrintArtwork = document.getElementById('toggleArtworkPrint')?.checked ?? true;
+            if (!shouldPrintArtwork || artworkPages.length === 0) { return { elementToPrint: originalContainer, cleanup: () => {} }; }
+            const layoutContainer = document.createElement('div');
+            layoutContainer.id = 'png-layout-container';
+            const mainPage = document.createElement('div');
+            mainPage.className = 'png-page';
+            const mainContentTable = originalContainer.querySelector('.print-layout-table').cloneNode(true);
+            mainContentTable.querySelectorAll('.full-page-artwork, .landscape-page').forEach(el => el.remove());
+            mainPage.appendChild(mainContentTable);
+            layoutContainer.appendChild(mainPage);
+            artworkPages.forEach(artworkNode => {
+                const artworkPage = document.createElement('div');
+                artworkPage.className = 'png-page';
+                artworkPage.appendChild(artworkNode.cloneNode(true));
+                layoutContainer.appendChild(artworkPage);
+            });
+            document.body.appendChild(layoutContainer);
+            document.body.classList.add('png-export-mode');
+            const cleanup = () => {
+                const tempContainer = document.getElementById('png-layout-container');
+                if (tempContainer) tempContainer.remove();
+                document.body.classList.remove('png-export-mode');
+            };
+            return { elementToPrint: layoutContainer, cleanup };
+        }
+        
+        async function convertImageToBase64(imgElement) { if (!imgElement || !imgElement.src || imgElement.src.startsWith('data:image')) return; const originalSrc = imgElement.src; try { const response = await fetch(originalSrc, { cache: 'force-cache' }); if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`); const blob = await response.blob(); return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onloadend = () => { imgElement.src = reader.result; resolve(true); }; reader.onerror = reject; reader.readAsDataURL(blob); }); } catch (error) { console.error(`Failed to fetch or convert image: ${originalSrc}`, error); return false; } }
+        
         async function downloadPDF() {
             const pdfBtn = document.getElementById('btn-pdf');
             const originalBtnContent = pdfBtn.innerHTML;
@@ -161,6 +219,7 @@
                 const orderId = document.getElementById('lenh_sx').textContent || 'unknown';
                 const filename = `LSX-${orderId}.pdf`;
                 const allImages = Array.from(document.querySelectorAll('#logo-img, #artwork-image-container img, .full-page-artwork img, .landscape-page img'));
+                await Promise.all(allImages.map(img => convertImageToBase64(img)));
                 const opt = { margin: [8, 6, 8, 6], filename: filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 3, useCORS: true, logging: false }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
                 try {
                     await html2pdf().from(element).set(opt).save();
@@ -179,21 +238,26 @@
             const originalBtnContent = pngBtn.innerHTML;
             pngBtn.disabled = true;
             pngBtn.innerHTML = '<div class="spinner-small"></div><span>Đang tạo...</span>';
-            document.body.classList.add('pdf-export-mode');
-            
-            setTimeout(async () => {
-                const element = document.querySelector('.bill-container');
+            const { elementToPrint, cleanup } = prepareLayoutForPNG();
+            try {
                 const orderId = document.getElementById('lenh_sx').textContent || 'unknown';
                 const filename = `LSX-${orderId}.png`;
-                const canvas = await html2canvas(element, { scale: 3, useCORS: true, logging: false });
+                const allImages = Array.from(elementToPrint.querySelectorAll('img'));
+                await Promise.all(allImages.map(img => convertImageToBase64(img)));
+                const canvas = await html2canvas(elementToPrint, { scale: 3, useCORS: true, logging: false });
                 const link = document.createElement('a');
                 link.download = filename;
                 link.href = canvas.toDataURL('image/png');
+                document.body.appendChild(link);
                 link.click();
+                document.body.removeChild(link);
+            } catch (error) {
+                console.error("Error creating PNG:", error);
+            } finally {
+                cleanup();
                 pngBtn.disabled = false;
                 pngBtn.innerHTML = originalBtnContent;
-                document.body.classList.remove('pdf-export-mode');
-            }, 50);
+            }
         }
 
         function getUrlParameter(name) { return decodeURIComponent((new URLSearchParams(window.location.search).get(name) || '').replace(/\+/g, ' ')); }
@@ -256,11 +320,12 @@
             } 
         }
         
+        // =========== START: UPDATED renderPlanTable FUNCTION ===========
         function renderPlanTable(planJSON) {
             const tableBody = document.getElementById('plan-table-body');
             tableBody.innerHTML = '';
             if (!planJSON) {
-                tableBody.innerHTML = `<tr><td colspan="8" class="center"><em>Chưa có kế hoạch sản xuất.</em></td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="7" class="center"><em>Chưa có kế hoạch sản xuất.</em></td></tr>`;
                 return;
             }
             try {
@@ -272,88 +337,51 @@
                         plans.sort((a, b) => {
                             const indexA = processOrder.indexOf(a.cong_doan.trim());
                             const indexB = processOrder.indexOf(b.cong_doan.trim());
-                            return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+                            const finalIndexA = indexA === -1 ? 999 : indexA;
+                            const finalIndexB = indexB === -1 ? 999 : indexB;
+                            return finalIndexA - finalIndexB;
                         });
                     }
                     plans.forEach((p, index) => {
                         const row = document.createElement('tr');
-                        row.innerHTML = `<td class="center">${index + 1}</td><td>${p.cong_doan || ''}</td><td class="center">${formatNumber(p.sl_yeu_cau) || ''}</td><td class="center">${(parseFloat(p.sl_dat) || 0) > 0 ? formatNumber(p.sl_dat) : ''}</td><td class="center">${parseFloat(p.sl_hu) ? formatNumber(p.sl_hu) : ''}</td><td class="center">${p.han_hoan_thanh || ''}</td><td>${p.nguoi_thuc_hien || ''}</td><td>${p.ghi_chu || ''}</td>`;
+                        const slDatValue = parseFloat(p.sl_dat) || 0;
+                        row.innerHTML = `<td class="center">${index + 1}</td><td>${p.cong_doan || ''}</td><td class="center">${formatNumber(p.sl_yeu_cau) || ''}</td><td class="center">${slDatValue > 0 ? formatNumber(p.sl_dat) : ''}</td><td class="center">${parseFloat(p.sl_hu) ? formatNumber(p.sl_hu) : ''}</td><td>${p.nguoi_thuc_hien || ''}</td><td>${p.ghi_chu || ''}</td>`;
                         tableBody.appendChild(row);
                     });
                 } else {
-                    tableBody.innerHTML = `<tr><td colspan="8" class="center"><em>Chưa có kế hoạch sản xuất.</em></td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="7" class="center"><em>Chưa có kế hoạch sản xuất.</em></td></tr>`;
                 }
             } catch (error) {
                 console.error("Error parsing plan JSON:", error, "Received JSON:", planJSON);
-                tableBody.innerHTML = `<tr><td colspan="8" class="center"><em>Lỗi đọc dữ liệu kế hoạch.</em></td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="7" class="center"><em>Lỗi đọc dữ liệu kế hoạch.</em></td></tr>`;
             }
         }
-
-        // =========== START: HÀM MỚI ĐỂ HIỂN THỊ VẬT TƯ ===========
+        // =========== END: UPDATED renderPlanTable FUNCTION ===========
+        
         function renderMaterialsTable() {
             const tableBody = document.getElementById('materials-table-body');
             if (!tableBody) return;
-
-            tableBody.innerHTML = ''; // Xóa nội dung cũ của bảng
+            tableBody.innerHTML = '';
             let materialsHtml = '';
-            let stt = 1; // Biến đếm số thứ tự
-
-            // 1. Xử lý Giấy Bìa
+            let stt = 1;
             const maBia = getUrlParameter('vt_bia_ma');
             if (maBia) {
-                materialsHtml += `
-                    <tr>
-                        <td class="center">${stt++}</td>
-                        <td>${maBia}</td>
-                        <td class="center text-bold">${formatNumber(getUrlParameter('vt_bia_sl_mua'))}</td>
-                        <td class="center">${getUrlParameter('vt_bia_kho_in')}</td>
-                        <td class="center text-bold">${formatNumber(getUrlParameter('vt_bia_sl_in'))}</td>
-                        <td class="center">${formatNumber(getUrlParameter('vt_bia_bu_hao'))}</td>
-                        <td class="center">${getUrlParameter('vt_bia_kieu_in')}</td>
-                    </tr>
-                `;
+                materialsHtml += `<tr><td class="center">${stt++}</td><td>${maBia}</td><td class="center text-bold">${formatNumber(getUrlParameter('vt_bia_sl_mua'))}</td><td class="center">${getUrlParameter('vt_bia_kho_in')}</td><td class="center text-bold">${formatNumber(getUrlParameter('vt_bia_sl_in'))}</td><td class="center">${formatNumber(getUrlParameter('vt_bia_bu_hao'))}</td><td class="center">${getUrlParameter('vt_bia_kieu_in')}</td></tr>`;
             }
-
-            // 2. Xử lý Giấy Ruột
             const maRuot = getUrlParameter('vt_ruot_ma');
             if (maRuot) {
-                materialsHtml += `
-                    <tr>
-                        <td class="center">${stt++}</td>
-                        <td>${maRuot}</td>
-                        <td class="center text-bold">${formatNumber(getUrlParameter('vt_ruot_sl_mua'))}</td>
-                        <td class="center">${getUrlParameter('vt_ruot_kho_in')}</td>
-                        <td class="center text-bold">${formatNumber(getUrlParameter('vt_ruot_sl_in'))}</td>
-                        <td class="center">${formatNumber(getUrlParameter('vt_ruot_bu_hao'))}</td>
-                        <td class="center">${getUrlParameter('vt_ruot_kieu_in')}</td>
-                    </tr>
-                `;
+                materialsHtml += `<tr><td class="center">${stt++}</td><td>${maRuot}</td><td class="center text-bold">${formatNumber(getUrlParameter('vt_ruot_sl_mua'))}</td><td class="center">${getUrlParameter('vt_ruot_kho_in')}</td><td class="center text-bold">${formatNumber(getUrlParameter('vt_ruot_sl_in'))}</td><td class="center">${formatNumber(getUrlParameter('vt_ruot_bu_hao'))}</td><td class="center">${getUrlParameter('vt_ruot_kieu_in')}</td></tr>`;
             }
-
-            // 3. Xử lý Giấy Bồi
             const maBoi = getUrlParameter('vt_boi_ma');
             if (maBoi) {
-                materialsHtml += `
-                    <tr>
-                        <td class="center">${stt++}</td>
-                        <td>${maBoi}</td>
-                        <td class="center text-bold">${formatNumber(getUrlParameter('vt_boi_sl_mua'))}</td>
-                        <td class="center">-</td>
-                        <td class="center">-</td>
-                        <td class="center">${formatNumber(getUrlParameter('vt_boi_bu_hao'))}</td>
-                        <td class="center">-</td>
-                    </tr>
-                `;
+                materialsHtml += `<tr><td class="center">${stt++}</td><td>${maBoi}</td><td class="center text-bold">${formatNumber(getUrlParameter('vt_boi_sl_mua'))}</td><td class="center">-</td><td class="center">-</td><td class="center">${formatNumber(getUrlParameter('vt_boi_bu_hao'))}</td><td class="center">-</td></tr>`;
             }
-
-            // Kiểm tra xem có vật tư nào không, nếu không thì hiển thị thông báo
             if (materialsHtml === '') {
                 tableBody.innerHTML = '<tr><td colspan="7" class="center"><em>Không có thông tin vật tư.</em></td></tr>';
             } else {
                 tableBody.innerHTML = materialsHtml;
             }
         }
-        // =========== END: HÀM MỚI ĐỂ HIỂN THỊ VẬT TƯ ===========
 
         function setTextOrHide(elementId, value, parentSelector = '.info-item') { const element = document.getElementById(elementId); const parent = document.getElementById(`parent_${elementId}`) || (element ? element.closest(parentSelector) : null); if (value && String(value).trim() !== '' && String(value).trim() !== '0') { if(element) element.textContent = formatNumber(value); if(parent) parent.classList.remove('hidden-item'); } else { if(parent) parent.classList.add('hidden-item'); } }
         
@@ -364,32 +392,25 @@
                 if (fileNameOrUrl.startsWith('http')) { return fileNameOrUrl; }
                 return imageBaseUrl + encodeURIComponent(fileNameOrUrl);
             };
-
             document.title = `Lệnh Sản Xuất - ${data.lenh_sx || 'Demo'}`;
             const setText = (id, value, isNumeric = false) => { const el = document.getElementById(id); if (el) el.textContent = isNumeric ? formatNumber(value) : (value || ''); };
-            
             setText('lenh_sx', data.lenh_sx);
             if (data.ngay_tao_lenh) { const date = new Date(data.ngay_tao_lenh); if(!isNaN(date.getTime())) setText('ngay_tao_lenh', date.toLocaleDateString('vi-VN')); }
             setText('loai_don', data.loai_don); setText('khach_hang', data.ten_khach_hang); setText('sl_tong', data.sl_tong, true); setText('nguoi_lap_phieu', data.nguoi_lap_phieu); setText('nguoi_duyet', data.nguoi_duyet);
             if (data.han_giao_hang) { const date = new Date(data.han_giao_hang); if(!isNaN(date.getTime())) setText('han_giao_hang', date.toLocaleDateString('vi-VN')); }
-            
             setTextOrHide('quy_trinh_san_xuat', data.quy_trinh_san_xuat); setTextOrHide('ghi_chu_binh_bai', data.ghi_chu_binh_bai);
             setTextOrHide('ma_mang', data.ma_mang); setTextOrHide('dien_tich_ep_kim', data.dien_tich_ep_kim); setTextOrHide('trang_phu', data.trang_phu); setTextOrHide('chiet_quang', data.chiet_quang); setTextOrHide('boi', data.boi); setTextOrHide('be_noi', data.be_noi); setTextOrHide('kieu_be', data.kieu_be); setTextOrHide('so_khuon_be', data.so_khuon_be); setTextOrHide('ghi_chu_be', data.ghi_chu_be); setTextOrHide('xe', data.xe); setTextOrHide('dan', data.dan); setTextOrHide('cat_thanh_pham', data.cat_thanh_pham); setTextOrHide('thanh_pham_khac', data.thanh_pham_khac); setTextOrHide('ghi_chu_thanh_pham', data.ghi_chu_thanh_pham); setTextOrHide('ghi_chu_giao_hang', data.ghi_chu_giao_hang); setTextOrHide('ghi_chu', data.ghi_chu);
-            
             if (data.ma_mang) { setText('kho_mang', data.kho_mang); setText('sl_mang_m', data.sl_mang_m, true); }
             if (data.dien_tich_ep_kim) { setText('ma_nhu', data.ma_nhu); }
             if (data.so_khuon_be) { setText('khuon_be', data.khuon_be); }
             
-            // --- GỌI CÁC HÀM RENDER BẢNG ---
-            renderMaterialsTable(); // <--- GỌI HÀM MỚI
+            renderMaterialsTable();
             renderProductsTable(data.products_json); 
             renderPlanTable(data.plan_json); 
             
             if(data.lenh_sx) { generateQRCode('order-qrcode', data.lenh_sx); }
-            
             const finalArtworkUrl = getFullImageUrl(data.hinh_bai_binh_1);
             displayImage(document.getElementById('artwork-image-container'), finalArtworkUrl, 'Hình bài bình');
-            
             const containerForExtraArtworks = document.querySelector('.bill-container');
             if (data.show_artwork === 'true' && containerForExtraArtworks) { 
                 containerForExtraArtworks.querySelectorAll('.full-page-artwork, .landscape-page').forEach(el => el.remove());
@@ -415,7 +436,7 @@
         function loadDemoData() { 
             const demoProducts = [ { "masp": "SP001 - Hộp quà tặng cao cấp", "dvt": "Cái", "sl_dat": "3000", "sl_tp": "2950", "sl_giao": "1500", "ghi_chu": "Màu đỏ cờ, logo ép kim" }]; 
             const demoPlan = [ {"cong_doan":"Dán thành phẩm"}, {"cong_doan":"Bế"}, {"cong_doan":"In Offset"}, {"cong_doan":"Cán màng"} ]; 
-            const demoData = {lenh_sx: 'LSX-DEMO-001', ngay_tao_lenh: '2024-07-25', loai_don: 'Sản xuất mới', ten_khach_hang: 'CÔNG TY TNHH THƯƠNG MẠI DỊCH VỤ SQH', quy_trinh_san_xuat: 'In Offset , Cán màng , Bế , Dán thành phẩm', sl_tong: '10500', han_giao_hang: '2024-08-15', hinh_bai_binh_1: 'https://via.placeholder.com/800x600.png?text=Hinh+Bai+Binh+1', show_artwork: 'true', products_json: JSON.stringify(demoProducts), plan_json: JSON.stringify(demoPlan) }; 
+            const demoData = {lenh_sx: 'LSX-DEMO-001', ngay_tao_lenh: '2024-07-25', loai_don: 'Sản xuất mới', ten_khach_hang: 'CÔNG TY TNHH THƯƠNG MẠI DỊCH VỤ SQH', quy_trinh_san_xuat: 'In Offset , Cán màng , Bế , Dán thành phẩm', sl_tong: '10500', han_giao_hang: '2024-08-15', hinh_bai_binh_1: 'https://via.placeholder.com/800x600.png?text=Hinh+Bai+Binh+1', hinh_bai_binh_2: 'https://via.placeholder.com/800x600.png?text=Hinh+Bai+Binh+2+(Landscape)', products_json: JSON.stringify(demoProducts), plan_json: JSON.stringify(demoPlan), show_artwork: 'true' }; 
             populateProductionOrder(demoData); 
             const watermark = document.createElement('div'); watermark.className = 'demo-watermark'; watermark.innerHTML = 'LỆNH NHÁP'; document.getElementById('bill-container').appendChild(watermark); 
         }
@@ -425,13 +446,20 @@
             initializeApp();
             const toggleCheckbox = document.getElementById('toggleArtworkPrint');
             if (toggleCheckbox) {
-                toggleCheckbox.addEventListener('change', () => document.body.classList.toggle('hide-final-artwork', !toggleCheckbox.checked));
+                toggleCheckbox.checked = true;
+                const updatePrintClass = () => { document.body.classList.toggle('hide-final-artwork', !toggleCheckbox.checked); };
+                updatePrintClass();
+                toggleCheckbox.addEventListener('change', updatePrintClass);
             }
             const lightboxOverlay = document.getElementById('lightbox-overlay');
-            if(lightboxOverlay) {
-                lightboxOverlay.addEventListener('click', (e) => { if(e.target === lightboxOverlay) closeLightbox(); });
-                const lightboxClose = document.querySelector('.lightbox-close');
-                if(lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
+            const lightboxClose = document.querySelector('.lightbox-close');
+            if(lightboxOverlay && lightboxClose) {
+                lightboxClose.addEventListener('click', closeLightbox);
+                lightboxOverlay.addEventListener('click', function(event) {
+                    if (event.target === this) {
+                        closeLightbox();
+                    }
+                });
             }
         });
     </script>

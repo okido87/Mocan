@@ -65,10 +65,9 @@
         .product-table th, .product-table td { border: 1px solid #000; padding: 6px 8px; vertical-align: middle; text-align: center; }
         .product-table thead th { background-color: #92d050; font-weight: bold; }
         
-        /* CHANGE: Updated sub-header styles */
         .product-table .sub-header th { 
-            background-color: #92d050; /* Same color as main header */
-            white-space: nowrap;     /* Prevent text wrapping */
+            background-color: #92d050;
+            white-space: nowrap;
         }
         
         .product-table .col-content { text-align: left; }
@@ -106,7 +105,8 @@
         <div id="demoWatermark">DEMO</div>
 
         <div class="header-section">
-            <img src="https://raw.githubusercontent.com/okido87/Mocan/main/logo%20moc%20an-01.png" alt="Logo Mộc Ấn Print">
+            <!-- CHANGE 1: Use local logo and add ID -->
+            <img src="logo-header.png" alt="Logo Mộc Ấn Print" id="company-logo">
         </div>
 
         <div class="title-section">
@@ -182,7 +182,14 @@
         printStyleSheet.id = 'dynamic-print-style';
         document.head.appendChild(printStyleSheet);
 
-        function printDocument(size, showHeader) {
+        // CHANGE 2: Add waitForImages function
+        const waitForImages = () => Promise.all(
+            Array.from(document.querySelectorAll('#company-logo'))
+                 .filter(img => !img.complete)
+                 .map(img => new Promise(resolve => { img.onload = img.onerror = resolve; }))
+        );
+
+        async function printDocument(size, showHeader) {
             const body = document.body;
             printStyleSheet.innerHTML = `@page { size: ${size}; }`;
             
@@ -192,6 +199,8 @@
                 body.classList.add('print-no-header');
             }
             
+            // Wait for logo to load before printing
+            await waitForImages();
             window.print();
         }
 
@@ -289,4 +298,3 @@
     </script>
 </body>
 </html>
-

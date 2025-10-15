@@ -21,7 +21,7 @@
 
         /* Watermark Styles */
         #demoWatermark {
-            display: none; /* Hidden by default */
+            display: none;
             position: absolute;
             top: 50%;
             left: 50%;
@@ -29,17 +29,17 @@
             font-size: 120px;
             color: rgba(255, 0, 0, 0.08);
             font-weight: bold;
-            pointer-events: none; /* Prevents watermark from being clickable */
+            pointer-events: none;
             z-index: 0;
             text-align: center;
             white-space: nowrap;
         }
         .container.watermark-active #demoWatermark {
-            display: block; /* Show watermark when class is added */
+            display: block;
         }
         .container.watermark-active > * {
             position: relative;
-            z-index: 1; /* Ensure content is above watermark */
+            z-index: 1;
         }
 
 
@@ -51,7 +51,7 @@
         .control-btn.a5-no-header { background: #ffc107; color: black; }
         .control-btn.a5-header { background: #28a745; color: white; }
 
-        /* Layout Styles based on Image */
+        /* Layout Styles */
         .header-section { padding-bottom: 15px; text-align: center; }
         .header-section img { width: 100%; }
         .title-section { text-align: center; margin-bottom: 20px; }
@@ -59,12 +59,11 @@
         .title-section p { margin: 2px 0; font-size: 13px; }
 
         .info-table, .product-table, .signature-table { width: 100%; border-collapse: collapse; }
-        .info-table td { border: 1px solid #000; padding: 5px 8px; }
-        .info-table .label { font-weight: normal; }
+        /* CHANGE: Updated Info Table Styles */
+        .info-table td { border: 1px solid #000; padding: 5px 8px; vertical-align: top; }
 
         .product-table { margin-top: 15px; }
         .product-table th, .product-table td { border: 1px solid #000; padding: 6px 8px; vertical-align: middle; text-align: center; }
-        /* CHANGE: Header color changed to gray */
         .product-table thead th { background-color: #f2f2f2; font-weight: bold; }
         .product-table .sub-header th { background-color: #f2f2f2; }
         .product-table .col-content { text-align: left; }
@@ -72,7 +71,6 @@
         .notes-section { margin-top: 5px; border: 1px solid #000; border-top: none; padding: 8px; }
         .notes-section .disclaimer { margin-top: 10px; font-style: italic; font-weight: bold; }
         
-        /* CHANGE: Signature table styles updated */
         .signature-table { margin-top: 5px; table-layout: fixed; }
         .signature-table td { border: 1px solid #000; text-align: center; font-weight: bold; vertical-align: top; padding-top: 8px; }
         .signature-table .signature-box { height: 100px; position: relative; }
@@ -100,7 +98,6 @@
         <div id="demoWatermark">DEMO</div>
 
         <div class="header-section">
-            <!-- CHANGE: Updated logo/header image -->
             <img src="https://raw.githubusercontent.com/okido87/Mocan/main/logo%20moc%20an-01.png" alt="Logo Mộc Ấn Print">
         </div>
 
@@ -110,20 +107,21 @@
             <p>Số: <span id="soPhieu" class="dynamic-data"></span></p>
         </div>
 
+        <!-- CHANGE: Refined info table structure -->
         <table class="info-table">
             <tr>
-                <td><span class="label">Khách hàng:</span> <span id="tenKhachHang" class="dynamic-data"></span></td>
-                <td><span class="label">Số điện thoại:</span> <span id="soDienThoai" class="dynamic-data"></span></td>
+                <td>Khách hàng: <span id="tenKhachHang" class="dynamic-data"></span></td>
+                <td>Số điện thoại: <span id="soDienThoai" class="dynamic-data"></span></td>
             </tr>
             <tr>
-                <td colspan="2"><span class="label">Địa chỉ giao hàng:</span> <span id="diaChiGiao" class="dynamic-data"></span></td>
+                <td colspan="2">Địa chỉ giao hàng: <span id="diaChiGiao" class="dynamic-data"></span></td>
             </tr>
             <tr>
-                <td><span class="label">Người liên hệ:</span> <span id="nguoiNhanHang" class="dynamic-data"></span></td>
-                <td><span class="label">Hình thức vận chuyển:</span> <span id="hinhThucVC" class="dynamic-data"></span></td>
+                <td>Người liên hệ: <span id="nguoiNhanHang" class="dynamic-data"></span></td>
+                <td>Hình thức vận chuyển: <span id="hinhThucVC" class="dynamic-data"></span></td>
             </tr>
              <tr id="lyDoXuatRow" style="display: none;">
-                <td colspan="2"><span class="label">Lý do xuất kho:</span> <span id="lyDoXuat" class="dynamic-data"></span></td>
+                <td colspan="2">Lý do xuất kho: <span id="lyDoXuat" class="dynamic-data"></span></td>
             </tr>
         </table>
 
@@ -153,7 +151,6 @@
             </div>
         </div>
         
-        <!-- CHANGE: Updated signature table structure -->
         <table class="signature-table">
             <tr>
                 <td id="tdNguoiNhan">Người nhận hàng</td>

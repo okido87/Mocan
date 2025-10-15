@@ -15,7 +15,7 @@
             background: white; 
             box-shadow: 0 0 10px rgba(0,0,0,0.1); 
             padding: 10mm; 
-            position: relative; /* Needed for watermark positioning */
+            position: relative;
         }
         .dynamic-data { font-weight: bold; }
 
@@ -59,7 +59,6 @@
         .title-section p { margin: 2px 0; font-size: 13px; }
 
         .info-table, .product-table, .signature-table { width: 100%; border-collapse: collapse; }
-        /* CHANGE: Updated Info Table Styles */
         .info-table td { border: 1px solid #000; padding: 5px 8px; vertical-align: top; }
 
         .product-table { margin-top: 15px; }
@@ -77,11 +76,15 @@
         .signature-table .signature-name { position: absolute; bottom: 5px; left: 0; right: 0; font-weight: bold; }
 
         /* Dynamic Print Styles */
+        /* CHANGE: Use visibility: hidden to preserve space instead of display: none */
+        .print-no-header .header-section {
+            visibility: hidden;
+        }
+        
         @media print {
             body { background-color: white; padding: 0; }
             .print-controls { display: none; }
             .container { max-width: none; width: 100%; margin: 0; padding: 0; box-shadow: none; border: none; }
-            .print-no-header .header-section { display: none; }
         }
         @page { margin: 10mm; }
     </style>
@@ -107,7 +110,6 @@
             <p>Số: <span id="soPhieu" class="dynamic-data"></span></p>
         </div>
 
-        <!-- CHANGE: Refined info table structure -->
         <table class="info-table">
             <tr>
                 <td>Khách hàng: <span id="tenKhachHang" class="dynamic-data"></span></td>
@@ -177,13 +179,13 @@
         document.head.appendChild(printStyleSheet);
 
         function printDocument(size, showHeader) {
-            const container = document.body;
+            const body = document.body; // Target body for class toggle
             printStyleSheet.innerHTML = `@page { size: ${size}; }`;
             
             if (showHeader) {
-                container.classList.remove('print-no-header');
+                body.classList.remove('print-no-header');
             } else {
-                container.classList.add('print-no-header');
+                body.classList.add('print-no-header');
             }
             
             window.print();

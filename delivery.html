@@ -52,8 +52,8 @@
         .control-btn.a5-header { background: #28a745; color: white; }
 
         /* Layout Styles based on Image */
-        .header-section { padding-bottom: 15px; }
-        .header-section img { width: 100%; } /* CHANGE: Logo is now full-width */
+        .header-section { padding-bottom: 15px; text-align: center; }
+        .header-section img { width: 100%; }
         .title-section { text-align: center; margin-bottom: 20px; }
         .title-section h1 { font-size: 24px; font-weight: bold; margin: 0; letter-spacing: 2px; }
         .title-section p { margin: 2px 0; font-size: 13px; }
@@ -64,16 +64,19 @@
 
         .product-table { margin-top: 15px; }
         .product-table th, .product-table td { border: 1px solid #000; padding: 6px 8px; vertical-align: middle; text-align: center; }
-        .product-table thead th { background-color: #92d050; font-weight: bold; }
-        .product-table .sub-header th { background-color: #c5e0b4; }
+        /* CHANGE: Header color changed to gray */
+        .product-table thead th { background-color: #f2f2f2; font-weight: bold; }
+        .product-table .sub-header th { background-color: #f2f2f2; }
         .product-table .col-content { text-align: left; }
         
         .notes-section { margin-top: 5px; border: 1px solid #000; border-top: none; padding: 8px; }
         .notes-section .disclaimer { margin-top: 10px; font-style: italic; font-weight: bold; }
         
-        .signature-table { margin-top: 5px; }
+        /* CHANGE: Signature table styles updated */
+        .signature-table { margin-top: 5px; table-layout: fixed; }
         .signature-table td { border: 1px solid #000; text-align: center; font-weight: bold; vertical-align: top; padding-top: 8px; }
-        .signature-space { height: 80px; }
+        .signature-table .signature-box { height: 100px; position: relative; }
+        .signature-table .signature-name { position: absolute; bottom: 5px; left: 0; right: 0; font-weight: bold; }
 
         /* Dynamic Print Styles */
         @media print {
@@ -97,7 +100,8 @@
         <div id="demoWatermark">DEMO</div>
 
         <div class="header-section">
-            <img src="https://raw.githubusercontent.com/okido87/Mocan/refs/heads/main/logo%20moc%20an-01.png" alt="Logo Mộc Ấn">
+            <!-- CHANGE: Updated logo/header image -->
+            <img src="https://raw.githubusercontent.com/okido87/Mocan/main/logo%20moc%20an-01.png" alt="Logo Mộc Ấn Print">
         </div>
 
         <div class="title-section">
@@ -149,20 +153,22 @@
             </div>
         </div>
         
+        <!-- CHANGE: Updated signature table structure -->
         <table class="signature-table">
             <tr>
-                <td id="tdNguoiNhan" style="display: none;">Người nhận hàng</td>
+                <td id="tdNguoiNhan">Người nhận hàng</td>
                 <td id="tdThuKho" style="display: none;">Thủ kho</td>
                 <td>Người giao hàng</td>
                 <td>Người lập</td>
             </tr>
             <tr>
-                <td><div class="signature-space"></div></td>
-                <td><div class="signature-space"></div></td>
-                <td>
-                    <div class="signature-space"></div>
-                    <span id="nguoiLap" class="dynamic-data"></span><br>
-                    <span id="nguoiLapSdt" class="dynamic-data"></span>
+                <td class="signature-box"></td>
+                <td class="signature-box"></td>
+                <td class="signature-box">
+                    <div class="signature-name">
+                        <span id="nguoiLap" class="dynamic-data"></span><br>
+                        <span id="nguoiLapSdt" class="dynamic-data"></span>
+                    </div>
                 </td>
             </tr>
         </table>
@@ -247,13 +253,11 @@
 
                 if (jsonData) {
                     deliveryData = JSON.parse(decodeURIComponent(jsonData));
-                    container.classList.remove('watermark-active'); // Remove watermark for real data
+                    container.classList.remove('watermark-active'); 
                 } else {
-                    // CHANGE: DEMO MODE ACTIVATED
                     console.log("Không tìm thấy dữ liệu, đang chạy dữ liệu mẫu.");
-                    container.classList.add('watermark-active'); // Add watermark for demo data
+                    container.classList.add('watermark-active'); 
                     
-                    // CHANGE: Demo data now has 2 product rows
                     deliveryData = { 
                         "so_phieu": "PGH-DEMO-001", 
                         "ngay_lap": new Date().toISOString(), 
@@ -284,4 +288,3 @@
     </script>
 </body>
 </html>
-

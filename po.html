@@ -125,7 +125,12 @@
 
     <div class="container">
         <div id="demoWatermark">ĐƠN HÀNG DEMO</div>
-        <div class="header"><div class="logo"><img src="https://raw.githubusercontent.com/okido87/Mocan/refs/heads/main/logo%20moc%20an-01.png" alt="Logo Mộc Ấn"></div></div>
+        <div class="header">
+            <div class="logo">
+                <!-- CHANGE 1: Use local logo and add ID -->
+                <img src="logo-header.png" alt="Logo Mộc Ấn" id="company-logo">
+            </div>
+        </div>
         <div class="title">ĐƠN ĐẶT HÀNG</div>
         <div class="order-number">Số: <span id="soPhieu" class="dynamic-data"></span></div>
         <table class="customer-info">
@@ -161,6 +166,13 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // CHANGE 2: Wait for ALL images (including company logo)
+            const waitForImages = () => Promise.all(
+                Array.from(document.querySelectorAll('.product-image img, #company-logo'))
+                    .filter(img => !img.complete)
+                    .map(img => new Promise(resolve => { img.onload = img.onerror = resolve; }))
+            );
+
             window.downloadPdf = async () => {
                 const downloadBtn = document.getElementById('downloadBtn');
                 const printBtn = document.getElementById('printBtn');
@@ -172,7 +184,6 @@
                 const element = document.querySelector('.container');
                 const orderId = document.getElementById('soPhieu').textContent || 'DonHang';
 
-                // ================== PHẦN SỬA LỖI ==================
                 const opt = {
                     margin: 10,
                     filename: `${orderId}.pdf`,
@@ -180,21 +191,18 @@
                     html2canvas: {
                         scale: 2,
                         useCORS: true,
-                        // Thêm dòng này để buộc html2canvas render toàn bộ chiều cao của phần tử,
-                        // tránh bị cắt xén nội dung cuối trang khi tải PDF.
                         windowHeight: element.scrollHeight
                     },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
-                // ================== KẾT THÚC SỬA LỖI ==================
 
-                element.style.padding = '0'; // Tạm thời bỏ padding để margin của PDF kiểm soát
+                element.style.padding = '0';
                 
                 html2pdf().from(element).set(opt).save().catch(err => {
                     console.error("Lỗi khi tạo PDF:", err);
                     alert("Đã có lỗi xảy ra khi tạo file PDF. Vui lòng thử lại.");
                 }).finally(() => {
-                    element.style.padding = '10mm'; // Khôi phục padding
+                    element.style.padding = '10mm';
                     hideLoading();
                     downloadBtn.disabled = false;
                     printBtn.disabled = false;
@@ -282,7 +290,7 @@
             };
             
             const generateDemoData = () => ({ so_dh: "DH-DEMO-001", ten_kh: "Công ty TNHH Khách Hàng Mẫu", ngay_lap: new Date().toISOString(), dia_chi_giao: "123 Đường Demo, Phường ABC, Quận XYZ, TP.HCM", nguoi_lap_don: "Nguyễn Văn Mẫu", nguoi_nhan_hang: "Trần Thị B", sdt: "0987654321", han_giao: "Giao hàng tận nơi", ghi_chu_dh: "Đây là ghi chú cho đơn hàng demo.", nguoi_duyet: "Lê Thị Giám Đốc", nguoi_lap_ky: "Nguyễn Văn Mẫu", thanh_tien: 3516480, vat_rate: 0.08, bank_name: "CÔNG TY TNHH QUẢNG CÁO MỘC ẤN", bank_stk: "157938519", bank_branch: "Ngân hàng TMCP Á Châu, CN Phú Lâm", products: [{ masp: "SP001 - Hộp Giấy Carton", dvt: "Cái", sl_dat: 1500, don_gia: 1500, thanh_tien: 2250000, hinh_anh: "https://placehold.co/100x100/e74c3c/white?text=SP001", ghi_chu: "In offset 4 màu." },{ masp: "SP002 - Túi Giấy Kraft", dvt: "Cái", sl_dat: 2000, don_gia: 633.24, thanh_tien: 1266480, hinh_anh: "", ghi_chu: "Không quai." },] });
-            const waitForImages = () => Promise.all(Array.from(document.querySelectorAll('.product-image img')).filter(img => !img.complete).map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })));
+            
             window.printDocument = async () => { printBtn.disabled = true; await waitForImages(); window.print(); printBtn.disabled = false; };
 
             const updateColspans = () => {

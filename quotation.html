@@ -81,7 +81,12 @@
 
     <div class="container" id="invoice">
         <div id="demoWatermark">BÁO GIÁ DEMO</div>
-        <div class="header"> <div class="logo"><img src="https://github.com/okido87/Mocan/blob/main/logo%20moc%20an.jpg?raw=true" alt="Logo Mộc Ấn"></div> </div>
+        <div class="header"> 
+            <div class="logo">
+                <!-- CHANGE 1: Sử dụng đường dẫn tương đối và thêm ID cho logo -->
+                <img src="logo-header.png" alt="Logo Mộc Ấn" id="company-logo">
+            </div> 
+        </div>
         <div class="title">BẢNG BÁO GIÁ</div>
         <div class="quote-number">Số: <span id="soBG" class="dynamic-data"></span></div>
         <div class="info-grid">
@@ -121,7 +126,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // ... (các hằng số và hàm tiện ích như formatNumber, showLoading, v.v. giữ nguyên) ...
             const printBtn = document.getElementById('printBtn');
             const downloadBtn = document.getElementById('downloadBtn');
             const loadingOverlay = document.getElementById('loadingOverlay');
@@ -131,7 +135,14 @@
             const formatNumber = (num) => (num === null || num === undefined || num === "" || num === 0) ? '' : new Intl.NumberFormat('vi-VN').format(num);
             const showLoading = (text = 'Đang xử lý...') => { loadingText.textContent = text; loadingOverlay.style.display = 'flex'; };
             const hideLoading = () => loadingOverlay.style.display = 'none';
-            const waitForImages = () => Promise.all( Array.from(document.querySelectorAll('.product-image img')).filter(img => !img.complete).map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })) );
+            
+            // CHANGE 2: Chờ TẤT CẢ hình ảnh (bao gồm cả logo chính)
+            const waitForImages = () => Promise.all(
+                Array.from(document.querySelectorAll('.product-image img, #company-logo'))
+                     .filter(img => !img.complete)
+                     .map(img => new Promise(resolve => { img.onload = img.onerror = resolve; }))
+            );
+
             const numberToWords = (n) => { if (n === null || n === undefined || isNaN(n)) return "Không đồng"; n = Math.floor(n); if (n === 0) return "Không đồng"; let units = ["", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"]; let teens = ["mười", "mười một", "mười hai", "mười ba", "mười bốn", "mười lăm", "mười sáu", "mười bảy", "mười tám", "mười chín"]; let tens = ["", "", "hai mươi", "ba mươi", "bốn mươi", "năm mươi", "sáu mươi", "bảy mươi", "tám mươi", "chín mươi"]; let scales = ["", "nghìn", "triệu", "tỷ"]; function convertChunk(num) { if (num === 0) return ""; let chunkStr = ""; let hundreds = Math.floor(num / 100); let remainder = num % 100; if (hundreds > 0) { chunkStr += units[hundreds] + " trăm"; if (remainder > 0) chunkStr += " linh "; } if (remainder > 0) { if (remainder < 10) { chunkStr += units[remainder]; } else if (remainder < 20) { chunkStr += teens[remainder - 10]; } else { let ten = Math.floor(remainder / 10); let unit = remainder % 10; chunkStr += tens[ten]; if (unit > 0) { if (unit === 1) chunkStr += " mốt"; else if (unit === 5) chunkStr += " lăm"; else chunkStr += " " + units[unit]; } } } return chunkStr; } if (n < 0) return "Âm " + numberToWords(Math.abs(n)); let word = ""; let scaleIndex = 0; while (n > 0) { let chunk = n % 1000; if (chunk > 0) { word = convertChunk(chunk) + " " + scales[scaleIndex] + " " + word; } n = Math.floor(n / 1000); scaleIndex++; } word = word.trim().replace(/\s+/g, ' '); word = word.charAt(0).toUpperCase() + word.slice(1); return word + " đồng"; };
             
             window.printDocument = async () => {
@@ -180,7 +191,6 @@
             };
             
             function populateData(data) {
-                // Populate header and customer info (same as before)
                 document.title = `Báo giá ${data.so_bg || ''}`;
                 document.getElementById('soBG').textContent = data.so_bg || '';
                 document.getElementById('kinhGui').textContent = data.ten_kh || '';
@@ -195,7 +205,6 @@
                 document.getElementById('bankStk').textContent = data.bank_stk || '';
                 document.getElementById('bankBranch').textContent = data.bank_branch || '';
                 
-                // Populate product table (same as before)
                 const tbody = document.getElementById('productTableBody');
                 tbody.innerHTML = '';
                 if (data.products && data.products.length > 0) {
@@ -219,7 +228,6 @@
                     tbody.innerHTML = `<tr><td colspan="8">Không có sản phẩm nào.</td></tr>`;
                 }
 
-                // CHANGE: Build notes dynamically from individual fields
                 const notesContainer = document.getElementById('ghiChuList');
                 notesContainer.innerHTML = '';
                 const notes = [];
@@ -250,7 +258,6 @@
                     } else {
                         console.log("Không tìm thấy dữ liệu, đang chạy dữ liệu mẫu.");
                         container.classList.add('watermark-active');
-                        // Demo data now includes individual note fields
                         orderData = { 
                             "so_bg": "BG-DEMO-001", "ngay_bg": new Date().toLocaleDateString('en-GB'), 
                             "ten_kh": "CÔNG TY TNHH KHÁCH HÀNG MẪU", 
@@ -266,7 +273,6 @@
                                 { "ten_sp": "Sản phẩm Mẫu 2", "quy_cach_sp": "Quy cách chi tiết cho sản phẩm mẫu 2...", "dvt": "cái", "so_luong": 200, "don_gia": 2500, "thanh_tien": 500000, "cp_thiet_ke": 50000, "hinh_anh": "https://placehold.co/100x50/2ecc71/white?text=SP2", "ghi_chu_sp": "" }, 
                                 { "ten_sp": "Sản phẩm Mẫu 3", "quy_cach_sp": "Quy cách chi tiết cho sản phẩm mẫu 3...", "dvt": "cái", "so_luong": 50, "don_gia": 10000, "thanh_tien": 500000, "cp_thiet_ke": 0, "hinh_anh": "https://placehold.co/100x50/e74c3c/white?text=SP3", "ghi_chu_sp": "" } 
                             ],
-                            // Demo note fields
                             "thoi_han_bg": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB'),
                             "vat": 0.08,
                             "phi_van_chuyen": "Miễn phí vận chuyển cho đơn hàng trên 2 triệu trong TP. HCM.",

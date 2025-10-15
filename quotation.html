@@ -34,29 +34,16 @@
         .info-line { display: flex; margin-bottom: 5px; }
         .info-line .label { width: 100px; flex-shrink: 0; }
         .info-line .value { font-weight: bold; }
-        .product-table { width: 100%; border-collapse: collapse; table-layout: fixed; /* === THAY ĐỔI: Thêm table-layout fixed === */ }
+        .product-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         .product-table th, .product-table td { border: 1px solid #000; padding: 6px 8px; vertical-align: middle; text-align: center; word-wrap: break-word; }
         .product-table th { background-color: #f2f2f2; font-weight: bold; }
         .product-table .left-align { text-align: left; }
         .product-table .product-spec { white-space: pre-wrap; }
         .product-table .product-name-spec strong { display: block; margin-bottom: 4px; }
         .product-table .number { text-align: right; }
-
-        /* === THAY ĐỔI 1: Tối ưu layout hình ảnh sát viền cell === */
-        .product-table td.col-image {
-            padding: 0; /* Bỏ padding của riêng cell hình ảnh */
-        }
-        .product-image {
-            width: 100%; /* Lấp đầy chiều rộng cell */
-            height: 100%; /* Lấp đầy chiều cao cell */
-            min-height: 80px; /* Giữ chiều cao tối thiểu cho hàng */
-            margin: auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        .product-table td.col-image { padding: 0; }
+        .product-image { width: 100%; height: 100%; min-height: 80px; margin: auto; display: flex; align-items: center; justify-content: center; }
         .product-image img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        
         .design-fee-line { font-style: italic; font-size: 12px; margin-top: 4px; border-top: 1px dotted #ccc; padding-top: 4px; }
         .total-row { font-weight: bold; }
         .notes-section { margin-top: 20px; margin-bottom: 30px; }
@@ -68,21 +55,16 @@
         .signature-table td { width: 50%; text-align: center; font-weight: bold; vertical-align: top; padding: 5px; border: none; }
         .signature-space { height: 70px; }
         .signature-date { margin-bottom: 5px; font-style: italic; font-weight: normal; }
-        
-        /* === THAY ĐỔI 2: Cập nhật lại độ rộng các cột === */
         .col-stt { width: 5%; }
-        .col-name-spec { width: 32%; } /* Giảm đi để nhường cho cột hình ảnh */
+        .col-name-spec { width: 32%; }
         .col-dvt { width: 7%; }
         .col-sl { width: 8%; }
         .col-dongia { width: 10%; }
-        .col-thanhtien { width: 12%; } /* Giảm đi để nhường cho cột hình ảnh */
-        .col-image { width: 18%; } /* Tăng độ rộng cột hình ảnh */
-        .col-ghichu { width: auto; } /* Để cột ghi chú tự động co giãn */
-        
-        /* === THAY ĐỔI 3: Cập nhật lại logic ẩn hình ảnh === */
+        .col-thanhtien { width: 12%; }
+        .col-image { width: 18%; }
+        .col-ghichu { width: auto; }
         .no-image-mode .col-image { display: none; }
-        .no-image-mode .col-name-spec { width: 50%; } /* Khi ẩn, cột tên sẽ rộng ra để lấp khoảng trống 18% của cột hình ảnh */
-
+        .no-image-mode .col-name-spec { width: 50%; }
         @media print {
             body { background-color: white; padding: 0; }
             .print-controls, .loading-overlay { display: none !important; }
@@ -138,8 +120,8 @@
     </div>
 
     <script>
-        // Phần JavaScript không thay đổi nên được giữ nguyên
         document.addEventListener('DOMContentLoaded', function() {
+            // ... (các hằng số và hàm tiện ích như formatNumber, showLoading, v.v. giữ nguyên) ...
             const printBtn = document.getElementById('printBtn');
             const downloadBtn = document.getElementById('downloadBtn');
             const loadingOverlay = document.getElementById('loadingOverlay');
@@ -175,7 +157,6 @@
                 const element = document.getElementById('invoice');
                 const originalPadding = element.style.padding;
                 element.style.padding = '0';
-
                 const orderId = document.getElementById('soBG').textContent || 'BaoGia';
                 
                 const opt = {
@@ -199,6 +180,7 @@
             };
             
             function populateData(data) {
+                // Populate header and customer info (same as before)
                 document.title = `Báo giá ${data.so_bg || ''}`;
                 document.getElementById('soBG').textContent = data.so_bg || '';
                 document.getElementById('kinhGui').textContent = data.ten_kh || '';
@@ -213,6 +195,7 @@
                 document.getElementById('bankStk').textContent = data.bank_stk || '';
                 document.getElementById('bankBranch').textContent = data.bank_branch || '';
                 
+                // Populate product table (same as before)
                 const tbody = document.getElementById('productTableBody');
                 tbody.innerHTML = '';
                 if (data.products && data.products.length > 0) {
@@ -235,13 +218,21 @@
                 } else {
                     tbody.innerHTML = `<tr><td colspan="8">Không có sản phẩm nào.</td></tr>`;
                 }
+
+                // CHANGE: Build notes dynamically from individual fields
                 const notesContainer = document.getElementById('ghiChuList');
                 notesContainer.innerHTML = '';
-                if (data.ghi_chu_bg && data.ghi_chu_bg.length > 0) {
-                    data.ghi_chu_bg.forEach(note => {
-                        notesContainer.insertAdjacentHTML('beforeend', `<p>${note.replace(/^\*/, '-').trim()}</p>`);
-                    });
-                }
+                const notes = [];
+                if (data.thoi_han_bg) notes.push(`- Bảng báo giá chỉ có giá trị đến ${data.thoi_han_bg}!`);
+                if (data.vat !== undefined) notes.push(`- Giá trên chưa bao gồm ${data.vat * 100}% VAT.`);
+                if (data.phi_van_chuyen) notes.push(`- ${data.phi_van_chuyen}`);
+                if (data.thoi_gian_giao_hang) notes.push(`- Thời gian giao hàng: ${data.thoi_gian_giao_hang}`);
+                if (data.dat_coc) notes.push(`- Đặt cọc: ${data.dat_coc}`);
+                if (data.thoi_han_thanh_toan) notes.push(`- Thời hạn thanh toán: ${data.thoi_han_thanh_toan}`);
+                
+                notes.forEach(note => {
+                    notesContainer.insertAdjacentHTML('beforeend', `<p>${note}</p>`);
+                });
             }
             
             const initializeApp = () => {
@@ -258,8 +249,31 @@
                         container.classList.remove('watermark-active');
                     } else {
                         console.log("Không tìm thấy dữ liệu, đang chạy dữ liệu mẫu.");
-                        orderData = { "so_bg": "BG-DEMO-001", "ngay_bg": new Date().toLocaleDateString('en-GB'), "ten_kh": "CÔNG TY TNHH KHÁCH HÀNG MẪU", "dia_chi_giao": "123 Đường Demo, Phường XYZ, Quận 1, TP. HCM", "sdt_kh": "0909123456", "thoi_han_bg": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB'), "nv_kd": "Nguyễn Văn A", "ten_cong_ty": "CÔNG TY TNHH QUẢNG CÁO MỘC ẤN", "ghi_chu_bg": [ "Bảng báo giá chỉ có giá trị đến ngày hết hạn.", "Giá trên chưa bao gồm 0% VAT.", "Miễn phí vận chuyển cho đơn hàng trên 2 triệu trong TP. HCM." ], "bank_name": "CÔNG TY TNHH QUẢNG CÁO MỘC ẤN", "bank_stk": "157938519", "bank_branch": "Ngân hàng TMCP Á Châu (ACB), CN Phú Lâm", "tong_thanh_toan": 2415000, "products": [ { "ten_sp": "Sản phẩm Mẫu 1", "quy_cach_sp": "Quy cách chi tiết cho sản phẩm mẫu 1...", "dvt": "cái", "so_luong": 100, "don_gia": 5000, "thanh_tien": 500000, "cp_thiet_ke": 0, "hinh_anh": "https://placehold.co/100x50/3498db/white?text=SP1", "ghi_chu_sp": "" }, { "ten_sp": "Sản phẩm Mẫu 2", "quy_cach_sp": "Quy cách chi tiết cho sản phẩm mẫu 2...", "dvt": "cái", "so_luong": 200, "don_gia": 2500, "thanh_tien": 500000, "cp_thiet_ke": 50000, "hinh_anh": "https://placehold.co/100x50/2ecc71/white?text=SP2", "ghi_chu_sp": "" }, { "ten_sp": "Sản phẩm Mẫu 3", "quy_cach_sp": "Quy cách chi tiết cho sản phẩm mẫu 3...", "dvt": "cái", "so_luong": 50, "don_gia": 10000, "thanh_tien": 500000, "cp_thiet_ke": 0, "hinh_anh": "https://placehold.co/100x50/e74c3c/white?text=SP3", "ghi_chu_sp": "" } ] };
                         container.classList.add('watermark-active');
+                        // Demo data now includes individual note fields
+                        orderData = { 
+                            "so_bg": "BG-DEMO-001", "ngay_bg": new Date().toLocaleDateString('en-GB'), 
+                            "ten_kh": "CÔNG TY TNHH KHÁCH HÀNG MẪU", 
+                            "dia_chi_giao": "123 Đường Demo, Phường XYZ, Quận 1, TP. HCM", 
+                            "sdt_kh": "0909123456", 
+                            "nv_kd": "Nguyễn Văn A", 
+                            "ten_cong_ty": "CÔNG TY TNHH QUẢNG CÁO MỘC ẤN",
+                            "bank_name": "CÔNG TY TNHH QUẢNG CÁO MỘC ẤN", 
+                            "bank_stk": "157938519", "bank_branch": "Ngân hàng TMCP Á Châu (ACB), CN Phú Lâm", 
+                            "tong_thanh_toan": 1600000, 
+                            "products": [ 
+                                { "ten_sp": "Sản phẩm Mẫu 1", "quy_cach_sp": "Quy cách chi tiết cho sản phẩm mẫu 1...", "dvt": "cái", "so_luong": 100, "don_gia": 5000, "thanh_tien": 500000, "cp_thiet_ke": 0, "hinh_anh": "https://placehold.co/100x50/3498db/white?text=SP1", "ghi_chu_sp": "" }, 
+                                { "ten_sp": "Sản phẩm Mẫu 2", "quy_cach_sp": "Quy cách chi tiết cho sản phẩm mẫu 2...", "dvt": "cái", "so_luong": 200, "don_gia": 2500, "thanh_tien": 500000, "cp_thiet_ke": 50000, "hinh_anh": "https://placehold.co/100x50/2ecc71/white?text=SP2", "ghi_chu_sp": "" }, 
+                                { "ten_sp": "Sản phẩm Mẫu 3", "quy_cach_sp": "Quy cách chi tiết cho sản phẩm mẫu 3...", "dvt": "cái", "so_luong": 50, "don_gia": 10000, "thanh_tien": 500000, "cp_thiet_ke": 0, "hinh_anh": "https://placehold.co/100x50/e74c3c/white?text=SP3", "ghi_chu_sp": "" } 
+                            ],
+                            // Demo note fields
+                            "thoi_han_bg": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB'),
+                            "vat": 0.08,
+                            "phi_van_chuyen": "Miễn phí vận chuyển cho đơn hàng trên 2 triệu trong TP. HCM.",
+                            "thoi_gian_giao_hang": "5-7 ngày",
+                            "dat_coc": "50% giá trị đơn hàng",
+                            "thoi_han_thanh_toan": "Ngay khi giao hàng"
+                        };
                     }
                     
                     if (noImageFromUrl) { imageToggle.checked = false; productTable.classList.add('no-image-mode'); } 
